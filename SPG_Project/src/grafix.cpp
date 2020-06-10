@@ -1,6 +1,5 @@
 #include <string.h>
 #include <GL/glut.h>
-#include "list.hpp"
 #include "grafix.hpp"
 
 //functia care arata la intrarea in joc numele autorului

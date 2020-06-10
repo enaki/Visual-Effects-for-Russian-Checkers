@@ -8,6 +8,9 @@
 #define KING			1
 #define CHECKER			0
 
+#include <queue>
+#include <list>
+
 //definirea variabilelor globale
 int WIN;
 int MOUSEX = 0;
@@ -56,11 +59,11 @@ int moveIsLegal(int);
 int max(int, int);
 int min(int, int);
 int areIdentic(struct square a[R][C], struct square b[R][C]);
-void listOfMoves();
-void listOfJumpes();
+void listOfJumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<int, int>>& checkList);
+void listOfMoves(std::list<std::pair<int, int>>& moveList);
 void saveToFile();
 void initFromFile();
-int noMoreMoves(int);
+bool noMoreMoves(int);
 int countCheckers(int);
 void drawPossibleMoves();
 

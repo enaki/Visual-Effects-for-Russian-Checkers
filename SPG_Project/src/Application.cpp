@@ -1,5 +1,5 @@
 #ifdef __WIN32___
-#include <windows.h>
+	#include <windows.h>
 #endif
 #include <GL/glut.h>
 #include <math.h>
@@ -7,14 +7,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Application.hpp"
-#include "list.hpp"
+#include "utilities.hpp"
 #include "grafix.hpp"
+#include <queue>
+#include <algorithm>
+#include <list>
 #define M_PI 3.1415926535897932384626433832795
 
-//declararea listei de miscari, sarituri si verificare
-coada* mListFirst, * mListLast;
-coada* jListFirst, * jListLast;
-coada* vListFirst, * vListLast;
+
+std::list<std::pair<int, int>> jumpList;
+std::list<std::pair<int, int>> checkList;
+std::list<std::pair<int, int>> moveList;
 
 //functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
@@ -65,19 +68,15 @@ void saveToFile() {
 //este rechemata recursiv pe parcursul programului
 //si permite lucrul in timp real
 void timer(int s) {
-	if (!isEmptymList(vListFirst, vListLast))
-		delAllmList(vListFirst, vListLast);
-	if (!isEmptymList(mListFirst, mListLast))
-		delAllmList(mListFirst, mListLast);
-	if (!isEmptymList(jListFirst, jListLast))
-		delAllmList(jListFirst, jListLast);
+	if (!checkList.empty()) checkList.clear();
+	if (!jumpList.empty()) jumpList.clear();
+	if (!moveList.empty()) moveList.clear();
+	
 
-	listOfJumpes();
-	listOfMoves();
-
+	listOfJumpes(jumpList, checkList);
+	listOfMoves(moveList);
 
 	display();
-
 
 	int i, j;
 	for (i = 0; i < R; i++)
@@ -461,7 +460,7 @@ int moveIsLegal(int p) {
 	return 0;
 
 end:
-	if (isInList(jListFirst, sel.i, sel.j) && !JUMPED)
+	if (listContainElement<int>(jumpList, sel.i, sel.j) && !JUMPED)
 		return 0;
 	else
 		return ret;
@@ -486,12 +485,11 @@ void putChecker() {
 	_board[sel.i][sel.j].type = CHECKER;
 
 
-	if (!isEmptymList(jListFirst, jListLast))
-		delAllmList(jListFirst, jListLast);
+	if (!jumpList.empty()) jumpList.clear();
 
-	listOfJumpes();
+	listOfJumpes(jumpList, checkList);
 
-	if (JUMPED && isInList(jListFirst, to.i, to.j)) {
+	if (JUMPED && listContainElement(jumpList, to.i, to.j)) {
 		JUMPED = 0;
 		PRESSED = 0;
 
@@ -520,7 +518,7 @@ void putChecker() {
 }
 
 //completarea cozii mListFirst cu piese care pot efectua miscari
-void listOfMoves() {
+void listOfMoves(std::list<std::pair<int, int>> &moveList) {
 	int i, j;
 
 	for (i = 0; i < R; i++) {
@@ -536,7 +534,7 @@ void listOfMoves() {
 						(_board[i - 1][j].check == NO_CHECKER && i - 1 >= 0) ||
 						(_board[i + 1][k].check == NO_CHECKER && i + 1 < R && k < C && k >= 0) ||
 						(_board[i - 1][k].check == NO_CHECKER && i - 1 >= 0 && k < C && k >= 0)) {
-						addTomList(mListFirst, mListLast, i, j);
+						moveList.push_back(std::make_pair(i, j));
 					} //if lung
 				} //if KING
 				if (_board[i][j].type == CHECKER) {
@@ -544,7 +542,8 @@ void listOfMoves() {
 						(_board[i - 1][j].check == NO_CHECKER && i - 1 >= 0 && _board[i][j].check == BLACK_CHECKER) ||
 						(_board[i + 1][k].check == NO_CHECKER && i + 1 < R && k < C && k >= 0 && _board[i][j].check == WHITE_CHECKER) ||
 						(_board[i - 1][k].check == NO_CHECKER && i - 1 >= 0 && k < C && k >= 0 && _board[i][j].check == BLACK_CHECKER)) {
-						addTomList(mListFirst, mListLast, i, j);
+						moveList.push_back(std::make_pair(i, j));
+
 					} //if lung
 				} //if CHECKER
 			} //if !NO_CHECHER
@@ -553,7 +552,7 @@ void listOfMoves() {
 } //end listOfMoves
 
 //completarea cozii jListFirst cu piesele care trebuie sa sara
-void listOfJumpes() {
+void listOfJumpes(std::list<std::pair<int, int>> &jumpList, std::list<std::pair<int, int>>& checkList) {
 	int i, j;
 
 	for (i = 0; i < R; i++) {
@@ -575,8 +574,8 @@ void listOfJumpes() {
 						(_board[i + 1][k].check != NO_CHECKER && _board[i + 1][k].check != _board[i][j].check && _board[i + 2][k].check == NO_CHECKER && i + 2 < R && k < C && k >= 0) ||
 						(_board[i - 1][k].check != NO_CHECKER && _board[i - 1][k].check != _board[i][j].check && _board[i - 2][k].check == NO_CHECKER && i - 2 >= 0 && k < C && k >= 0)) {
 						if (_board[i][j].check == GO)
-							addTomList(jListFirst, jListLast, i, j);
-						addTomList(vListFirst, vListLast, i, j);
+							jumpList.push_back(std::make_pair(i, j));
+						checkList.push_back(std::make_pair(i, j));
 					} // if lung
 
 				} // if CHECKER
@@ -619,8 +618,8 @@ void listOfJumpes() {
 							++k;
 							if (_board[k][s].check == NO_CHECKER && k < R && s < C)
 								if (_board[i][j].check == GO)
-									addTomList(jListFirst, jListLast, i, j);
-							addTomList(vListFirst, vListLast, i, j);
+									jumpList.push_back(std::make_pair(i, j));
+							checkList.push_back(std::make_pair(i, j));
 							break;
 						}
 					}
@@ -659,8 +658,8 @@ void listOfJumpes() {
 							++k;
 							if (_board[k][s].check == NO_CHECKER && k < R && s >= 0)
 								if (_board[i][j].check == GO)
-									addTomList(jListFirst, jListLast, i, j);
-							addTomList(vListFirst, vListLast, i, j);
+									jumpList.push_back(std::make_pair(i, j));
+							checkList.push_back(std::make_pair(i, j));
 							break;
 						}
 					}
@@ -704,8 +703,8 @@ void listOfJumpes() {
 							--k;
 							if (_board[k][s].check == NO_CHECKER && k >= 0 && s < C)
 								if (_board[i][j].check == GO)
-									addTomList(jListFirst, jListLast, i, j);
-							addTomList(vListFirst, vListLast, i, j);
+									jumpList.push_back(std::make_pair(i, j));
+							checkList.push_back(std::make_pair(i, j));
 							break;
 						}
 					}
@@ -746,8 +745,8 @@ void listOfJumpes() {
 							--k;
 							if (_board[k][s].check == NO_CHECKER && k >= 0 && s >= 0)
 								if (_board[i][j].check == GO)
-									addTomList(jListFirst, jListLast, i, j);
-							addTomList(vListFirst, vListLast, i, j);
+									jumpList.push_back(std::make_pair(i, j));
+							checkList.push_back(std::make_pair(i, j));
 							break;
 						}
 					}
@@ -891,28 +890,21 @@ void undo() {
 	glutPostRedisplay();
 }
 
-//returneaza 1 daca piesele de tip "checker" nu mai au nici o miscare
-int noMoreMoves(int checker) {
-	int ver1 = 1, ver2 = 1;
-	coada* t = mListFirst;
-	while (t != NULL) {
-		if (_board[t->i][t->j].check == checker) {
-			ver1 = 0;
-			break;
+//returneaza true daca piesele de tip "checker" nu mai au nici o miscare
+bool noMoreMoves(int checker) {
+
+	for (auto it = moveList.begin(); it != moveList.end(); ++it) {
+		if (_board[it->first][it->second].check == checker) {
+			return false;
 		}
-		t = t->next;
 	}
 
-	t = vListFirst;
-	while (t != NULL) {
-		if (_board[t->i][t->j].check == checker) {
-			ver2 = 0;
-			break;
+	for (auto it = checkList.begin(); it != checkList.end(); ++it) {
+		if (_board[it->first][it->second].check == checker) {
+			return false;
 		}
-		t = t->next;
 	}
-
-	return (ver1 && ver2);
+	return true;
 }
 
 //returneaza numarul de piese de tip "checker"
@@ -1028,12 +1020,12 @@ void keyboard(unsigned char key, int x, int y) {
 void drawPossibleMoves() {
 	int i, j, ver = 1;
 	int a = sel.i, b = sel.j, c = to.i, d = to.j, e = JUMPED;
-	coada* first = jListFirst;
-	while (first != NULL) {
+	
+	for (auto it = jumpList.begin(); it != jumpList.end(); ++it) {
 		for (i = 0; i < 8; i++)
 			for (j = 0; j < 4; j++) {
-				sel.i = first->i;
-				sel.j = first->j;
+				sel.i = it->first;
+				sel.j = it->second;
 				to.i = i;
 				to.j = j;
 				if (moveIsLegal(0)) {
@@ -1047,17 +1039,15 @@ void drawPossibleMoves() {
 					}
 				}
 			}
-		first = first->next;
 	}
 
 	if (ver) {
-		first = mListFirst;
-		while (first != NULL) {
+		for (auto it = moveList.begin(); it != moveList.end(); ++it) {
 			for (i = 0; i < 8; i++)
 				for (j = 0; j < 4; j++) {
-					if (_board[first->i][first->j].check == GO) {
-						sel.i = first->i;
-						sel.j = first->j;
+					if (_board[it->first][it->second].check == GO) {
+						sel.i = it->first;
+						sel.j = it->second;
 						to.i = i;
 						to.j = j;
 						if (moveIsLegal(0)) {
@@ -1071,7 +1061,6 @@ void drawPossibleMoves() {
 						}
 					}
 				}
-			first = first->next;
 		}
 	}
 
@@ -1118,8 +1107,8 @@ void display() {
 
 			//selectarea unei piese
 			if (_board[i][j].check == GO && MOUSEX < _board[i][j].x + 30 && MOUSEX > _board[i][j].x - 30 && MOUSEY < _board[i][j].y + 30 && MOUSEY > _board[i][j].y - 30) {
-				if (!isEmptymList(jListFirst, jListLast)) {
-					if (isInList(jListFirst, i, j) && _board[i][j].check == GO) {
+				if (!jumpList.empty()) {
+					if (listContainElement(jumpList, i, j) && _board[i][j].check == GO) {
 						if (PRESSED) {
 							sel.i = i;
 							sel.j = j;
@@ -1134,8 +1123,8 @@ void display() {
 
 				}
 
-				else if (!isEmptymList(mListFirst, mListLast)) {
-					if (isInList(mListFirst, i, j)) {
+				else if (!moveList.empty()) {
+					if (listContainElement(moveList, i, j)) {
 						if (PRESSED) {
 							sel.i = i;
 							sel.j = j;
@@ -1217,27 +1206,12 @@ void display() {
 		}
 	}
 	else {
-		if (!isEmptymList(vListFirst, vListLast))
-		{
-			delAllmList(vListFirst, vListLast);
-			vListFirst = nullptr;
-			vListLast = nullptr;
-		}
-		if (!isEmptymList(mListFirst, mListLast))
-		{
-			delAllmList(mListFirst, mListLast);
-			mListFirst = nullptr;
-			mListLast = nullptr;
-		}
-		if (!isEmptymList(jListFirst, jListLast))
-		{
-			delAllmList(jListFirst, jListLast);
-			jListFirst = nullptr;
-			jListLast = nullptr;
-		}
+		if (!checkList.empty()) checkList.clear();
+		if (!jumpList.empty()) jumpList.clear();
+		if (!moveList.empty()) moveList.clear();
 
-		listOfJumpes();
-		listOfMoves();
+		listOfJumpes(jumpList, checkList);
+		listOfMoves(moveList);
 
 		//desenam intro Joc de Dame de Curcudel Eugen, la inceput de joc
 		if (TYPE1 == TYPE2)

@@ -21,9 +21,6 @@
     <ClCompile Include="src\grafix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\list.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\fragment.frag" />
@@ -37,7 +34,7 @@
     <ClInclude Include="src\grafix.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\list.hpp">
+    <ClInclude Include="src\utilities.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

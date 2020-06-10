@@ -1,5 +1,4 @@
-#ifndef _GRAFIX_
-#define _GRAFIX_
+#pragma once
 
 //prototipurile functiilor de text grafic
 void showIntro(int c);
@@ -8,4 +7,3 @@ void showHelp(int);
 void drawAround(int);
 void showTurn(const char*, int, int, int);
 
-#endif

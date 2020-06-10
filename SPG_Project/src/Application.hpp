@@ -1,6 +1,4 @@
-#ifndef _GAME_
-#define _GAME_
-
+#pragma once
 //definirea constantelor
 #define R				8
 #define C				4
@@ -29,8 +27,8 @@ int HELP = 0;
 struct square {
 	float x;
 	float y;
-	unsigned int check:2;
-	unsigned int type:1;
+	unsigned int check : 2;
+	unsigned int type : 1;
 } _board[R][C], _undoBoard[R][C];
 
 //structura unei locatii pe tabla
@@ -66,4 +64,3 @@ int noMoreMoves(int);
 int countCheckers(int);
 void drawPossibleMoves();
 
-#endif

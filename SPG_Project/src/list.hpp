@@ -1,36 +1,20 @@
-#ifndef __LIST_H__
-#define __LIST_H__
-
-#include <stdlib.h>
+#pragma once
 
 //Structura de data: lista de tip coada
 typedef struct coada {
 	int i;
 	int j;
-	struct coada *next;
+	struct coada* next;
 } coada;
 
-//declararea listei de miscari, sarituri si verificare
-coada *mListFirst, *mListLast;
-coada *jListFirst, *jListLast;
-coada *vListFirst, *vListLast;
+
 
 //prototipurilor functiilor de prelucrare a cozii
-void addTomList(int, int);
-void delOnemList();
-void delAllmList();
-int isEmptymList();
+void addTomList(coada*& mListFirst, coada*& mListLast, int, int);
+void delOnemList(coada*& mListFirst, coada*& mListLast);
+void delAllmList(coada*& mListFirst, coada*& mListLast);
+int isEmptymList(coada*& mListFirst, coada*& mListLast);
 
-void addTojList(int, int);
-void delOnejList();
-void delAlljList();
-int isEmptyjList();
 
-void addTovList(int, int);
-void delOnevList();
-void delAllvList();
-int isEmptyvList();
+int isInList(coada*, int, int);
 
-int isInList(coada *, int, int); 
-
-#endif

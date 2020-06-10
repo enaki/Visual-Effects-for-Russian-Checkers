@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "list.h"
+#include "list.hpp"
 
 //functiile de prelucrare a cozii cu miscari
 void addTomList(int i, int j){

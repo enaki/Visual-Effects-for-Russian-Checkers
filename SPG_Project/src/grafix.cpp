@@ -1,7 +1,7 @@
 #include <string.h>
 #include <GL/glut.h>
-#include "list.h"
-#include "grafix.h"
+#include "list.hpp"
+#include "grafix.hpp"
 
 //functia care arata la intrarea in joc numele autorului
 void showIntro(int c){

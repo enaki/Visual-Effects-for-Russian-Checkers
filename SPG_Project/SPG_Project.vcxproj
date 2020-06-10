@@ -130,10 +130,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\grafix.cpp" />
+    <ClCompile Include="src\list.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\fragment.frag" />
+    <None Include="src\joc.check" />
     <None Include="src\vertex.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Application.hpp" />
+    <ClInclude Include="src\grafix.hpp" />
+    <ClInclude Include="src\list.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

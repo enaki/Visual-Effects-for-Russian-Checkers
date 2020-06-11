@@ -13,12 +13,9 @@
 
 //definirea variabilelor globale
 int WIN;
-int MOUSEX = 0;
-int MOUSEY = 0;
-int PRESSED = 0;
+
 int TYPE1 = NO_CHECKER;
 int TYPE2 = NO_CHECKER;
-int SIDE_COEF;
 int ROTIRI = 0;
 int GO = NO_CHECKER;
 int INDEXING = 0;
@@ -31,33 +28,23 @@ struct square {
 	float x;
 	float y;
 	unsigned int check : 2;
-	unsigned int type : 1;
+	bool type : 1;
 } _board[R][C], _undoBoard[R][C];
 
-//structura unei locatii pe tabla
-struct location {
-	int i;
-	int j;
-} sel, to;
-
+std::pair<int, int> sel, to;
 //prototipurile functiilor
 void boardInit();
 void display();
-void mouse(int, int, int, int);
-void motion(int, int);
 void timer(int);
 void createMenu();
 void actionMenu(int);
-void keyboard(unsigned char, int, int);
 void passiveMotion(int, int);
 void putChecker();
 void undo();
 void copyArray(struct square from[R][C], struct square to[R][C]);
 void sleep(unsigned int);
-struct location coordsToIndex(int, int);
+std::pair<int, int> coordsToIndex(int, int);
 int moveIsLegal(int);
-int max(int, int);
-int min(int, int);
 int areIdentic(struct square a[R][C], struct square b[R][C]);
 void listOfJumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<int, int>>& checkList);
 void listOfMoves(std::list<std::pair<int, int>>& moveList);

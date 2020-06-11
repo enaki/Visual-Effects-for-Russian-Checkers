@@ -21,6 +21,9 @@
     <ClCompile Include="src\grafix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\fragment.frag" />
@@ -35,6 +38,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\utilities.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Game.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIManager\keyboard.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIManager\mouse.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

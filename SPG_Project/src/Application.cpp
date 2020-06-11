@@ -12,6 +12,8 @@
 #include <queue>
 #include <algorithm>
 #include <list>
+#include "UIManager/keyboard.hpp"
+#include "UIManager/mouse.hpp"
 #define M_PI 3.1415926535897932384626433832795
 
 
@@ -31,6 +33,7 @@ int main(int argc, char** argv) {
 	WIN = glutCreateWindow("Joc de Dame - Curcudel Eugen");
 	createMenu();
 
+	keyboard::WIN = WIN;
 	glClearColor(0.9, 0.9, 0.9, 0.9);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -40,9 +43,9 @@ int main(int argc, char** argv) {
 	glutPassiveMotionFunc(passiveMotion);
 	glutDisplayFunc(display);
 	timer(0);
-	glutMouseFunc(mouse);
-	glutMotionFunc(motion);
-	glutKeyboardFunc(keyboard);
+	glutMouseFunc(mouse::mouse_listener);
+	glutMotionFunc(mouse::motion_listener);
+	glutKeyboardFunc(keyboard::keyboard_listener);
 	glutMainLoop();
 }
 
@@ -55,7 +58,7 @@ void saveToFile() {
 		exit(1);
 	}
 
-	fprintf(out, "%d %d %d %d %d %d %d %d %d %d", SIDE_COEF, MOUSEX, MOUSEY, sel.i, sel.j, to.i, to.j, GO, POS_MOVES, HELP);
+	fprintf(out, "%d %d %d %d %d %d %d %d %d %d", mouse::SIDE_COEF, mouse::MOUSEX, mouse::MOUSEY, sel.first, sel.second, to.first, to.second, GO, POS_MOVES, HELP);
 
 	int i, j;
 	for (i = 0; i < R; i++)
@@ -81,14 +84,14 @@ void timer(int s) {
 	int i, j;
 	for (i = 0; i < R; i++)
 		for (j = 0; j < C; j++)
-			if (MOUSEX < _board[i][j].x + 30 && MOUSEX > _board[i][j].x - 30 && MOUSEY < _board[i][j].y + 30 && MOUSEY > _board[i][j].y - 30)
-				if (PRESSED) {
-					to.i = i;
-					to.j = j;
+			if (mouse::MOUSEX < _board[i][j].x + 30 && mouse::MOUSEX > _board[i][j].x - 30 && mouse::MOUSEY < _board[i][j].y + 30 && mouse::MOUSEY > _board[i][j].y - 30)
+				if (mouse::PRESSED) {
+					to.first = i;
+					to.second = j;
 				}
 
 
-	if (sel.i != -1 && to.i != -1) {
+	if (sel.first != -1 && to.first != -1) {
 		copyArray(_board, _undoBoard);
 		if (moveIsLegal(1))
 			putChecker(); //recursie indirecta catre putChecker() care va redirectiona spre 
@@ -104,17 +107,17 @@ void timer(int s) {
 int moveIsLegal(int p) {
 	int ret = 0;
 	JUMPED = 0;
-	if (_board[sel.i][sel.j].type == CHECKER) {
-		if (_board[to.i][to.j].check == NO_CHECKER) {
+	if (_board[sel.first][sel.second].type == CHECKER) {
+		if (_board[to.first][to.second].check == NO_CHECKER) {
 
 			//saritura
-			if (sel.i == to.i - 2) {
-				if (sel.i % 2) {
-					if (sel.j == to.j - 1 || sel.j == to.j + 1)
-						if (_board[sel.i + 1][max(sel.j, to.j)].check != _board[sel.i][sel.j].check && _board[sel.i + 1][max(sel.j, to.j)].check != NO_CHECKER) {
+			if (sel.first == to.first - 2) {
+				if (sel.first % 2) {
+					if (sel.second == to.second - 1 || sel.second == to.second + 1)
+						if (_board[sel.first + 1][std::max(sel.second, to.second)].check != _board[sel.first][sel.second].check && _board[sel.first + 1][std::max(sel.second, to.second)].check != NO_CHECKER) {
 							if (p) {
-								_board[sel.i + 1][max(sel.j, to.j)].check = NO_CHECKER;
-								_board[sel.i + 1][max(sel.j, to.j)].type = CHECKER;
+								_board[sel.first + 1][std::max(sel.second, to.second)].check = NO_CHECKER;
+								_board[sel.first + 1][std::max(sel.second, to.second)].type = CHECKER;
 							}
 							JUMPED = 1;
 							ret = 1;
@@ -122,11 +125,11 @@ int moveIsLegal(int p) {
 						}
 				}
 				else {
-					if (sel.j == to.j + 1 || sel.j == to.j - 1)
-						if (_board[sel.i + 1][min(sel.j, to.j)].check != _board[sel.i][sel.j].check && _board[sel.i + 1][min(sel.j, to.j)].check != NO_CHECKER) {
+					if (sel.second == to.second + 1 || sel.second == to.second - 1)
+						if (_board[sel.first + 1][std::min(sel.second, to.second)].check != _board[sel.first][sel.second].check && _board[sel.first + 1][std::min(sel.second, to.second)].check != NO_CHECKER) {
 							if (p) {
-								_board[sel.i + 1][min(sel.j, to.j)].check = NO_CHECKER;
-								_board[sel.i + 1][min(sel.j, to.j)].type = CHECKER;
+								_board[sel.first + 1][std::min(sel.second, to.second)].check = NO_CHECKER;
+								_board[sel.first + 1][std::min(sel.second, to.second)].type = CHECKER;
 							}
 							JUMPED = 1;
 							ret = 1;
@@ -134,13 +137,13 @@ int moveIsLegal(int p) {
 						}
 				}
 			}
-			if (sel.i == to.i + 2) {
-				if (sel.i % 2) {
-					if (sel.j == to.j - 1 || sel.j == to.j + 1)
-						if (_board[sel.i - 1][max(sel.j, to.j)].check != _board[sel.i][sel.j].check && _board[sel.i - 1][max(sel.j, to.j)].check != NO_CHECKER) {
+			if (sel.first == to.first + 2) {
+				if (sel.first % 2) {
+					if (sel.second == to.second - 1 || sel.second == to.second + 1)
+						if (_board[sel.first - 1][std::max(sel.second, to.second)].check != _board[sel.first][sel.second].check && _board[sel.first - 1][std::max(sel.second, to.second)].check != NO_CHECKER) {
 							if (p) {
-								_board[sel.i - 1][max(sel.j, to.j)].check = NO_CHECKER;
-								_board[sel.i - 1][max(sel.j, to.j)].type = CHECKER;
+								_board[sel.first - 1][std::max(sel.second, to.second)].check = NO_CHECKER;
+								_board[sel.first - 1][std::max(sel.second, to.second)].type = CHECKER;
 							}
 							JUMPED = 1;
 							ret = 1;
@@ -148,11 +151,11 @@ int moveIsLegal(int p) {
 						}
 				}
 				else {
-					if (sel.j == to.j + 1 || sel.j == to.j - 1)
-						if (_board[sel.i - 1][min(sel.j, to.j)].check != _board[sel.i][sel.j].check && _board[sel.i - 1][min(sel.j, to.j)].check != NO_CHECKER) {
+					if (sel.second == to.second + 1 || sel.second == to.second - 1)
+						if (_board[sel.first - 1][std::min(sel.second, to.second)].check != _board[sel.first][sel.second].check && _board[sel.first - 1][std::min(sel.second, to.second)].check != NO_CHECKER) {
 							if (p) {
-								_board[sel.i - 1][min(sel.j, to.j)].check = NO_CHECKER;
-								_board[sel.i - 1][min(sel.j, to.j)].type = CHECKER;
+								_board[sel.first - 1][std::min(sel.second, to.second)].check = NO_CHECKER;
+								_board[sel.first - 1][std::min(sel.second, to.second)].type = CHECKER;
 							}
 							JUMPED = 1;
 							ret = 1;
@@ -163,16 +166,16 @@ int moveIsLegal(int p) {
 
 
 			//miscare simpla
-			if (sel.i == to.i - 1) {
-				if (_board[sel.i][sel.j].check == WHITE_CHECKER) {
-					if (sel.i % 2) {//impar
-						if (sel.j == to.j || sel.j == to.j - 1) {
+			if (sel.first == to.first - 1) {
+				if (_board[sel.first][sel.second].check == WHITE_CHECKER) {
+					if (sel.first % 2) {//impar
+						if (sel.second == to.second || sel.second == to.second - 1) {
 							ret = 1;
 							goto end;
 						}
 					}
 					else {
-						if (sel.j == to.j || sel.j == to.j + 1) {
+						if (sel.second == to.second || sel.second == to.second + 1) {
 							ret = 1;
 							goto end;
 						}
@@ -180,16 +183,16 @@ int moveIsLegal(int p) {
 				}
 			}
 
-			if (sel.i == to.i + 1) {
-				if (_board[sel.i][sel.j].check == BLACK_CHECKER) {
-					if (sel.i % 2) {//impar
-						if (sel.j == to.j || sel.j == to.j - 1) {
+			if (sel.first == to.first + 1) {
+				if (_board[sel.first][sel.second].check == BLACK_CHECKER) {
+					if (sel.first % 2) {//impar
+						if (sel.second == to.second || sel.second == to.second - 1) {
 							ret = 1;
 							goto end;
 						}
 					}
 					else {
-						if (sel.j == to.j || sel.j == to.j + 1) {
+						if (sel.second == to.second || sel.second == to.second + 1) {
 							ret = 1;
 							goto end;
 						}
@@ -202,43 +205,43 @@ int moveIsLegal(int p) {
 
 
 	//begin of if type is King
-	if (_board[sel.i][sel.j].type == KING) {
-		if (_board[to.i][to.j].check == NO_CHECKER) {
-			struct location rem;
-			rem.i = rem.j = -1;
+	if (_board[sel.first][sel.second].type == KING) {
+		if (_board[to.first][to.second].check == NO_CHECKER) {
+			std::pair<int, int> rem;
+			rem.first = rem.second = -1;
 			int count = 0, i, j;
 			int ver = 0, is = 0;
 
-			if (sel.i % 2) {
-				i = sel.i + 1;
-				j = sel.j + 1;
+			if (sel.first % 2) {
+				i = sel.first + 1;
+				j = sel.second + 1;
 			}
 			else {
-				i = sel.i;
-				j = sel.j;
+				i = sel.first;
+				j = sel.second;
 			}
 
-			if (to.i > sel.i && to.j >= j) { //daca ma duc in dreapta sus
+			if (to.first > sel.first && to.second >= j) { //daca ma duc in dreapta sus
 				int need = 0;
 				for (; j < C; i++) {
 					++need;
 
-					if (i == sel.i && j == sel.j)
+					if (i == sel.first && j == sel.second)
 						continue;
 
 
-					if (_board[i][j].check != NO_CHECKER && _board[i][j].check != _board[sel.i][sel.j].check) {
+					if (_board[i][j].check != NO_CHECKER && _board[i][j].check != _board[sel.first][sel.second].check) {
 						if (!count) {
-							rem.i = i;
-							rem.j = j;
+							rem.first = i;
+							rem.second = j;
 						}
 						++count;
 					}
 
-					if (_board[i][j].check == _board[sel.i][sel.j].check)
+					if (_board[i][j].check == _board[sel.first][sel.second].check)
 						return 0;
 
-					if (to.i == i && to.j == j) {
+					if (to.first == i && to.second == j) {
 						++is;
 						break;
 					}
@@ -251,8 +254,8 @@ int moveIsLegal(int p) {
 
 				if (count == 1 && is) {
 					if (p) {
-						_board[rem.i][rem.j].check = NO_CHECKER;
-						_board[rem.i][rem.j].type = CHECKER;
+						_board[rem.first][rem.second].check = NO_CHECKER;
+						_board[rem.first][rem.second].type = CHECKER;
 					}
 					JUMPED = 1;
 					ret = 1;
@@ -269,36 +272,36 @@ int moveIsLegal(int p) {
 			}
 
 
-			if (sel.i % 2) {
-				i = sel.i;
-				j = sel.j;
+			if (sel.first % 2) {
+				i = sel.first;
+				j = sel.second;
 			}
 			else {
-				i = sel.i + 1;
-				j = sel.j - 1;
+				i = sel.first + 1;
+				j = sel.second - 1;
 			}
 
-			if (to.i > sel.i && to.j <= j) { //daca ma duc in stinga sus
+			if (to.first > sel.first && to.second <= j) { //daca ma duc in stinga sus
 				int need = 0;
 
 
 				for (; j >= 0; i++) {
 					++need;
-					if (i == sel.i && j == sel.j)
+					if (i == sel.first && j == sel.second)
 						continue;
 
-					if (_board[i][j].check != NO_CHECKER && _board[i][j].check != _board[sel.i][sel.j].check) {
+					if (_board[i][j].check != NO_CHECKER && _board[i][j].check != _board[sel.first][sel.second].check) {
 						if (!count) {
-							rem.i = i;
-							rem.j = j;
+							rem.first = i;
+							rem.second = j;
 						}
 						++count;
 					}
 
-					if (_board[i][j].check == _board[sel.i][sel.j].check)
+					if (_board[i][j].check == _board[sel.first][sel.second].check)
 						return 0;
 
-					if (to.i == i && to.j == j) {
+					if (to.first == i && to.second == j) {
 						++is;
 						break;
 					}
@@ -311,8 +314,8 @@ int moveIsLegal(int p) {
 
 				if (count == 1 && is) {
 					if (p) {
-						_board[rem.i][rem.j].check = NO_CHECKER;
-						_board[rem.i][rem.j].type = CHECKER;
+						_board[rem.first][rem.second].check = NO_CHECKER;
+						_board[rem.first][rem.second].type = CHECKER;
 					}
 					JUMPED = 1;
 					ret = 1;
@@ -331,38 +334,38 @@ int moveIsLegal(int p) {
 
 
 
-			if (sel.i % 2) {
-				i = sel.i - 1;
-				j = sel.j + 1;
+			if (sel.first % 2) {
+				i = sel.first - 1;
+				j = sel.second + 1;
 			}
 			else {
-				i = sel.i;
-				j = sel.j;
+				i = sel.first;
+				j = sel.second;
 			}
 
-			if (to.i < sel.i && to.j >= j) { //daca ma duc in dreapta jos 
+			if (to.first < sel.first && to.second >= j) { //daca ma duc in dreapta jos 
 				int need = 0;
 
 
 				for (; j <= 3; i--) {
 					++need;
 
-					if (i == sel.i && j == sel.j) {
+					if (i == sel.first && j == sel.second) {
 						continue;
 					}
 
-					if (_board[i][j].check != NO_CHECKER && _board[i][j].check != _board[sel.i][sel.j].check) {
+					if (_board[i][j].check != NO_CHECKER && _board[i][j].check != _board[sel.first][sel.second].check) {
 						if (!count) {
-							rem.i = i;
-							rem.j = j;
+							rem.first = i;
+							rem.second = j;
 						}
 						++count;
 					}
 
-					if (_board[i][j].check == _board[sel.i][sel.j].check)
+					if (_board[i][j].check == _board[sel.first][sel.second].check)
 						return 0;
 
-					if (to.i == i && to.j == j) {
+					if (to.first == i && to.second == j) {
 						++is;
 						break;
 					}
@@ -375,8 +378,8 @@ int moveIsLegal(int p) {
 
 				if (count == 1 && is) {
 					if (p) {
-						_board[rem.i][rem.j].check = NO_CHECKER;
-						_board[rem.i][rem.j].type = CHECKER;
+						_board[rem.first][rem.second].check = NO_CHECKER;
+						_board[rem.first][rem.second].type = CHECKER;
 					}
 					JUMPED = 1;
 					ret = 1;
@@ -393,37 +396,37 @@ int moveIsLegal(int p) {
 			}
 
 
-			if (sel.i % 2) {
-				i = sel.i;
-				j = sel.j;
+			if (sel.first % 2) {
+				i = sel.first;
+				j = sel.second;
 			}
 			else {
-				i = sel.i - 1;
-				j = sel.j - 1;
+				i = sel.first - 1;
+				j = sel.second - 1;
 			}
 
 			count = 0;
-			if (to.i < sel.i && to.j <= j) { //daca ma duc in stinga jos 
+			if (to.first < sel.first && to.second <= j) { //daca ma duc in stinga jos 
 				int need = 0;
 
 
 				for (; j >= 0; i--) {
 					++need;
-					if (i == sel.i && j == sel.j)
+					if (i == sel.first && j == sel.second)
 						continue;
 
-					if (_board[i][j].check != NO_CHECKER && _board[i][j].check != _board[sel.i][sel.j].check) {
+					if (_board[i][j].check != NO_CHECKER && _board[i][j].check != _board[sel.first][sel.second].check) {
 						if (!count) {
-							rem.i = i;
-							rem.j = j;
+							rem.first = i;
+							rem.second = j;
 						}
 						++count;
 					}
 
-					if (_board[i][j].check == _board[sel.i][sel.j].check)
+					if (_board[i][j].check == _board[sel.first][sel.second].check)
 						return 0;
 
-					if (to.i == i && to.j == j) {
+					if (to.first == i && to.second == j) {
 						++is;
 						break;
 					}
@@ -436,8 +439,8 @@ int moveIsLegal(int p) {
 
 				if (count == 1 && is) {
 					if (p) {
-						_board[rem.i][rem.j].check = NO_CHECKER;
-						_board[rem.i][rem.j].type = CHECKER;
+						_board[rem.first][rem.second].check = NO_CHECKER;
+						_board[rem.first][rem.second].type = CHECKER;
 					}
 					JUMPED = 1;
 					ret = 1;
@@ -460,41 +463,31 @@ int moveIsLegal(int p) {
 	return 0;
 
 end:
-	if (listContainElement<int>(jumpList, sel.i, sel.j) && !JUMPED)
+	if (listContainElement<int>(jumpList, sel.first, sel.second) && !JUMPED)
 		return 0;
 	else
 		return ret;
 
 }
 
-//returneaza maximul dintre doua valori
-int max(int a, int b) {
-	return (a > b) ? a : b;
-}
-
-//returneaza minimul dintre doua valori
-int min(int a, int b) {
-	return (a < b) ? a : b;
-}
-
 //daca o miscare este posibila, atunci aceasta este efectuata
 void putChecker() {
-	_board[to.i][to.j].check = _board[sel.i][sel.j].check;
-	_board[to.i][to.j].type = _board[sel.i][sel.j].type;
-	_board[sel.i][sel.j].check = NO_CHECKER;
-	_board[sel.i][sel.j].type = CHECKER;
+	_board[to.first][to.second].check = _board[sel.first][sel.second].check;
+	_board[to.first][to.second].type = _board[sel.first][sel.second].type;
+	_board[sel.first][sel.second].check = NO_CHECKER;
+	_board[sel.first][sel.second].type = CHECKER;
 
 
 	if (!jumpList.empty()) jumpList.clear();
 
 	listOfJumpes(jumpList, checkList);
 
-	if (JUMPED && listContainElement(jumpList, to.i, to.j)) {
+	if (JUMPED && listContainElement(jumpList, to.first, to.second)) {
 		JUMPED = 0;
-		PRESSED = 0;
+		mouse::PRESSED = 0;
 
-		sel.i = to.i;
-		sel.j = to.j;
+		sel.first = to.first;
+		sel.second = to.second;
 
 		timer(0);//recursie indirecta catre timer() in caz ca userul are o serie de sarituri	
 	}
@@ -502,18 +495,18 @@ void putChecker() {
 
 		GO = (GO == WHITE_CHECKER) ? BLACK_CHECKER : WHITE_CHECKER;
 		JUMPED = 0;
-		PRESSED = 0;
+		mouse::PRESSED = 0;
 
 		display();
 
 		if (ROTIRI) {
 			sleep(1);
 			glRotatef(180, 0, 0, 1);
-			SIDE_COEF *= -1;
+			mouse::SIDE_COEF *= -1;
 		}
-		sel.i = sel.j = -1;
-		to.i = to.j = -1;
-		MOUSEX = MOUSEY = -240;
+		sel.first = sel.second = -1;
+		to.first = to.second = -1;
+		mouse::MOUSEX = mouse::MOUSEY = -240;
 	}
 }
 
@@ -770,58 +763,31 @@ void sleep(unsigned int Sec) {
 }
 
 //converteste coordonatele in locatie
-struct location coordsToIndex(int x, int y) {
-	struct location ret;
-	for (ret.i = 0; ret.i < R; ret.i++)
-		for (ret.j = 0; ret.j < C; ret.j++)
-			if (x < _board[ret.i][ret.j].x + 30 && x > _board[ret.i][ret.j].x - 30 && y < _board[ret.i][ret.j].y + 30 && y > _board[ret.i][ret.j].y - 30)
-				return ret;
+std::pair<int, int> coordsToIndex(int x, int y) {
+	std::pair<int, int> location;
+	for (location.first = 0; location.first < R; location.first++)
+		for (location.second = 0; location.second < C; location.second++)
+			if (x < _board[location.first][location.second].x + 30 && x > _board[location.first][location.second].x - 30 && y < _board[location.first][location.second].y + 30 && y > _board[location.first][location.second].y - 30)
+				return location;
 }
 
-//fixeaza x si y daca butonul sting al mouse-ului este aparat
-void mouse(int button, int state, int x, int y) {
-	if (button == GLUT_LEFT_BUTTON) {
-		MOUSEX = (x - 275) * SIDE_COEF;
-		MOUSEY = (y - 275) * (-1) * SIDE_COEF;
 
-		PRESSED = state == GLUT_DOWN; //echivalent cu seria de jos
-		/*if(state == GLUT_DOWN)
-			PRESSED = 1;
-		else
-			PRESSED = 0;
-		*/
-	}
-}
-
-//fixeaza coordonatele cind se trage mouse-ul cu un buton apasat
-void motion(int x, int y) {
-	MOUSEX = (x - 275) * SIDE_COEF;
-	MOUSEY = (y - 275) * (-1) * SIDE_COEF;
-}
 
 //fixeaza coordonatele cursorului, chiar daca nu se apasa nici un buton
 void passiveMotion(int x, int y) {
 	int i, j;
-	x = (x - 275) * SIDE_COEF;
-	y = (y - 275) * (-1) * SIDE_COEF;
-
-	int* cursMina = (int*)malloc(sizeof(int));
-	*cursMina = 0; //daca cursMina = 1, atunci cursorul va fi mina
+	x = (x - 275) * mouse::SIDE_COEF;
+	y = (y - 275) * (-1) * mouse::SIDE_COEF;
 
 	for (i = 0; i < R; i++)
 		for (j = 0; j < C; j++) {
-			//sageata cursorului devine "mina" sau "drag" deasupra pieselor
+			//sageata cursorului devine "std::mina" sau "drag" deasupra pieselor
 			if (_board[i][j].check != NO_CHECKER && x < _board[i][j].x + 30 && x > _board[i][j].x - 30 && y < _board[i][j].y + 30 && y > _board[i][j].y - 30) {
-				*cursMina = 1;
-				break;
+				glutSetCursor(GLUT_CURSOR_INFO);
+				return;
 			}
 		}
-
-	if (*cursMina)
-		glutSetCursor(GLUT_CURSOR_INFO);
-	else
-		glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
-	free(cursMina);
+	glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
 //initializarea tablei de dame din fisierul "joc.check"
@@ -833,7 +799,7 @@ void initFromFile() {
 		exit(1);
 	}
 
-	fscanf_s(in, "%d %d %d %d %d %d %d %d %d %d", &SIDE_COEF, &MOUSEX, &MOUSEY, &sel.i, &sel.j, &to.i, &to.j, &GO, &POS_MOVES, &HELP);
+	fscanf_s(in, "%d %d %d %d %d %d %d %d %d %d", &mouse::SIDE_COEF, &mouse::MOUSEX, &mouse::MOUSEY, &sel.first, &sel.second, &to.first, &to.second, &GO, &POS_MOVES, &HELP);
 
 	int i, j, check, type;
 	for (i = 0; i < R; i++)
@@ -850,10 +816,10 @@ void initFromFile() {
 void boardInit() {
 	int i, j, s = -240;
 	float x, y;
-	SIDE_COEF = 1;
-	MOUSEX = MOUSEY = -241;
-	sel.i = sel.j = -1;
-	to.i = to.j = -1;
+	mouse::SIDE_COEF = 1;
+	mouse::MOUSEX = mouse::MOUSEY = -241;
+	sel.first = sel.second = -1;
+	to.first = to.second = -1;
 
 	for (i = 0; i < R; i++) {
 		for (j = 0; j < C; j++) {
@@ -885,7 +851,7 @@ void undo() {
 	GO = (GO == WHITE_CHECKER) ? BLACK_CHECKER : WHITE_CHECKER;
 	if (ROTIRI) {
 		glRotatef(180, 0, 0, 1);
-		SIDE_COEF *= -1;
+		mouse::SIDE_COEF *= -1;
 	}
 	glutPostRedisplay();
 }
@@ -955,7 +921,7 @@ void actionMenu(int option) {
 		glutDestroyWindow(WIN);
 		exit(0);
 	case 1:
-		if (SIDE_COEF == -1)
+		if (mouse::SIDE_COEF == -1)
 			glRotatef(180, 0, 0, 1);
 		TYPE1 = WHITE_CHECKER;
 		TYPE2 = BLACK_CHECKER;
@@ -966,13 +932,13 @@ void actionMenu(int option) {
 		TYPE1 = WHITE_CHECKER;
 		TYPE2 = BLACK_CHECKER;
 		initFromFile();
-		if (SIDE_COEF == -1)
+		if (mouse::SIDE_COEF == -1)
 			glRotatef(180, 0, 0, 1);
 		break;
 	case 3:
-		SIDE_COEF *= -1;
-		MOUSEX = MOUSEY = -241;
-		sel.i = sel.j = -1;
+		mouse::SIDE_COEF *= -1;
+		mouse::MOUSEX = mouse::MOUSEY = -241;
+		sel.first = sel.second = -1;
 		glRotatef(180, 0, 0, 1);
 		break;
 	case 4:
@@ -1008,32 +974,26 @@ int areIdentic(struct square a[R][C], struct square b[R][C]) {
 
 //citirea datelor de la tastatura
 //in cazul meu, doar "Esc" pentru iesire
-void keyboard(unsigned char key, int x, int y) {
-	switch (key) {
-	case 27:
-		glutDestroyWindow(WIN);
-		exit(0);
-	}
-}
+
 
 //desenarea grafica a tuturor miscarilor posibile
 void drawPossibleMoves() {
 	int i, j, ver = 1;
-	int a = sel.i, b = sel.j, c = to.i, d = to.j, e = JUMPED;
+	int a = sel.first, b = sel.second, c = to.first, d = to.second, e = JUMPED;
 	
 	for (auto it = jumpList.begin(); it != jumpList.end(); ++it) {
 		for (i = 0; i < 8; i++)
 			for (j = 0; j < 4; j++) {
-				sel.i = it->first;
-				sel.j = it->second;
-				to.i = i;
-				to.j = j;
+				sel.first = it->first;
+				sel.second = it->second;
+				to.first = i;
+				to.second = j;
 				if (moveIsLegal(0)) {
 					if (JUMPED) {
 						(GO == WHITE_CHECKER) ? glColor3f(0, 1, 0) : glColor3f(1, 0, 0);
 						glBegin(GL_LINES);
-						glVertex2f(_board[sel.i][sel.j].x, _board[sel.i][sel.j].y);
-						glVertex2f(_board[to.i][to.j].x, _board[to.i][to.j].y);
+						glVertex2f(_board[sel.first][sel.second].x, _board[sel.first][sel.second].y);
+						glVertex2f(_board[to.first][to.second].x, _board[to.first][to.second].y);
 						glEnd();
 						ver = 0;
 					}
@@ -1046,16 +1006,16 @@ void drawPossibleMoves() {
 			for (i = 0; i < 8; i++)
 				for (j = 0; j < 4; j++) {
 					if (_board[it->first][it->second].check == GO) {
-						sel.i = it->first;
-						sel.j = it->second;
-						to.i = i;
-						to.j = j;
+						sel.first = it->first;
+						sel.second = it->second;
+						to.first = i;
+						to.second = j;
 						if (moveIsLegal(0)) {
 							if (!JUMPED) {
 								(GO == WHITE_CHECKER) ? glColor3f(0, 1, 0) : glColor3f(1, 0, 0);
 								glBegin(GL_LINES);
-								glVertex2f(_board[sel.i][sel.j].x, _board[sel.i][sel.j].y);
-								glVertex2f(_board[to.i][to.j].x, _board[to.i][to.j].y);
+								glVertex2f(_board[sel.first][sel.second].x, _board[sel.first][sel.second].y);
+								glVertex2f(_board[to.first][to.second].x, _board[to.first][to.second].y);
 								glEnd();
 							}
 						}
@@ -1064,10 +1024,10 @@ void drawPossibleMoves() {
 		}
 	}
 
-	sel.i = a;
-	sel.j = b;
-	to.i = c;
-	to.j = d;
+	sel.first = a;
+	sel.second = b;
+	to.first = c;
+	to.second = d;
 	JUMPED = e;
 }
 
@@ -1106,12 +1066,12 @@ void display() {
 				continue;
 
 			//selectarea unei piese
-			if (_board[i][j].check == GO && MOUSEX < _board[i][j].x + 30 && MOUSEX > _board[i][j].x - 30 && MOUSEY < _board[i][j].y + 30 && MOUSEY > _board[i][j].y - 30) {
+			if (_board[i][j].check == GO && mouse::MOUSEX < _board[i][j].x + 30 && mouse::MOUSEX > _board[i][j].x - 30 && mouse::MOUSEY < _board[i][j].y + 30 && mouse::MOUSEY > _board[i][j].y - 30) {
 				if (!jumpList.empty()) {
 					if (listContainElement(jumpList, i, j) && _board[i][j].check == GO) {
-						if (PRESSED) {
-							sel.i = i;
-							sel.j = j;
+						if (mouse::PRESSED) {
+							sel.first = i;
+							sel.second = j;
 						}
 
 						//culoarea pieselor selectate in dependenta de tip
@@ -1125,9 +1085,9 @@ void display() {
 
 				else if (!moveList.empty()) {
 					if (listContainElement(moveList, i, j)) {
-						if (PRESSED) {
-							sel.i = i;
-							sel.j = j;
+						if (mouse::PRESSED) {
+							sel.first = i;
+							sel.second = j;
 						}
 
 						//culoarea pieselor selectate in dependenta de tip
@@ -1156,7 +1116,7 @@ void display() {
 			//y+30 y sus
 
 			//desenam coronita la dame
-			//coordonatele virfurilor deduse de mine
+			//coordonatele virfurilor deduse de std::mine
 			if (_board[i][j].type == KING) {
 				float* mx = (float*)malloc(sizeof(float));
 				float* my = (float*)malloc(sizeof(float));
@@ -1171,14 +1131,14 @@ void display() {
 					glColor3f(0.0, 0.0, 1.0);
 				else if (_board[i][j].check == BLACK_CHECKER)
 					glColor3f(0.9, 0.1, 0.1);
-				glVertex2f(*mx, *my - 10 * SIDE_COEF);
-				glVertex2f(*mx + 10, *my - 10 * SIDE_COEF);
-				glVertex2f(*mx + 10, *my + 10 * SIDE_COEF);
-				glVertex2f(*mx + 5, *my - 5 * SIDE_COEF);
-				glVertex2f(*mx, *my + 10 * SIDE_COEF);
-				glVertex2f(*mx - 5, *my - 5 * SIDE_COEF);
-				glVertex2f(*mx - 10, *my + 10 * SIDE_COEF);
-				glVertex2f(*mx - 10, *my - 10 * SIDE_COEF);
+				glVertex2f(*mx, *my - 10 * mouse::SIDE_COEF);
+				glVertex2f(*mx + 10, *my - 10 * mouse::SIDE_COEF);
+				glVertex2f(*mx + 10, *my + 10 * mouse::SIDE_COEF);
+				glVertex2f(*mx + 5, *my - 5 * mouse::SIDE_COEF);
+				glVertex2f(*mx, *my + 10 * mouse::SIDE_COEF);
+				glVertex2f(*mx - 5, *my - 5 * mouse::SIDE_COEF);
+				glVertex2f(*mx - 10, *my + 10 * mouse::SIDE_COEF);
+				glVertex2f(*mx - 10, *my - 10 * mouse::SIDE_COEF);
 				glEnd();
 
 				free(mx);
@@ -1190,7 +1150,7 @@ void display() {
 
 	//desenam cifrele din stinga tablei, literele de jos
 	//si doua linii de contur
-	drawAround(SIDE_COEF);
+	drawAround(mouse::SIDE_COEF);
 
 	//Desenam toate miscarile posibile daca exista
 	if (POS_MOVES)
@@ -1198,9 +1158,9 @@ void display() {
 
 	//desenam output-ul meniului "Ajutor"
 	if (HELP) {
-		showHelp(SIDE_COEF);
-		if (PRESSED) {
-			if (MOUSEX * SIDE_COEF > 190 && MOUSEY * SIDE_COEF > 140 && MOUSEX * SIDE_COEF < 210 && MOUSEY * SIDE_COEF < 160) {
+		showHelp(mouse::SIDE_COEF);
+		if (mouse::PRESSED) {
+			if (mouse::MOUSEX * mouse::SIDE_COEF > 190 && mouse::MOUSEY * mouse::SIDE_COEF > 140 && mouse::MOUSEX * mouse::SIDE_COEF < 210 && mouse::MOUSEY * mouse::SIDE_COEF < 160) {
 				HELP = 0;
 			}
 		}
@@ -1215,21 +1175,21 @@ void display() {
 
 		//desenam intro Joc de Dame de Curcudel Eugen, la inceput de joc
 		if (TYPE1 == TYPE2)
-			showIntro(SIDE_COEF);
+			showIntro(mouse::SIDE_COEF);
 		else {
 			//afisam invingatorul sau detinatorul de miscare in timpul dat
 			if (countCheckers(WHITE_CHECKER) == 0 || noMoreMoves(WHITE_CHECKER)) {
-				showWiner("Negrele au invins!", SIDE_COEF);
-				showTurn("Negrele au invins!", SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
+				showWiner("Negrele au invins!", mouse::SIDE_COEF);
+				showTurn("Negrele au invins!", mouse::SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
 			}
 			else if (countCheckers(BLACK_CHECKER) == 0 || noMoreMoves(BLACK_CHECKER)) {
-				showWiner("Albele au invins!", SIDE_COEF);
-				showTurn("Albele au invins!", SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
+				showWiner("Albele au invins!", mouse::SIDE_COEF);
+				showTurn("Albele au invins!", mouse::SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
 			}
 			else if (GO == WHITE_CHECKER)
-				showTurn("Albele merg", SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
+				showTurn("Albele merg", mouse::SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
 			else if (GO == BLACK_CHECKER)
-				showTurn("Negrele merg", SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
+				showTurn("Negrele merg", mouse::SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
 		}
 	}
 

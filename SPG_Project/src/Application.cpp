@@ -12,14 +12,8 @@
 #include <queue>
 #include <algorithm>
 #include <list>
-#include "UIManager/keyboard.hpp"
-#include "UIManager/mouse.hpp"
-#define M_PI 3.1415926535897932384626433832795
+#include "data.hpp"
 
-
-std::list<std::pair<int, int>> jumpList;
-std::list<std::pair<int, int>> checkList;
-std::list<std::pair<int, int>> moveList;
 
 //functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
@@ -49,24 +43,6 @@ int main(int argc, char** argv) {
 	glutMainLoop();
 }
 
-//functia de salvare in fisier
-void saveToFile() {
-	FILE* out;
-	fopen_s(&out, "joc.check", "w");
-	if (!out) {
-		glutDestroyWindow(WIN);
-		exit(1);
-	}
-
-	fprintf(out, "%d %d %d %d %d %d %d %d %d %d", mouse::SIDE_COEF, mouse::MOUSEX, mouse::MOUSEY, sel.first, sel.second, to.first, to.second, GO, POS_MOVES, HELP);
-
-	int i, j;
-	for (i = 0; i < R; i++)
-		for (j = 0; j < C; j++)
-			fprintf(out, "%f %f %d %d\n", _board[i][j].x, _board[i][j].y, _board[i][j].check, _board[i][j].type);
-
-	fclose(out);
-}
 
 //este rechemata recursiv pe parcursul programului
 //si permite lucrul in timp real
@@ -755,23 +731,6 @@ void listOfJumpes(std::list<std::pair<int, int>> &jumpList, std::list<std::pair<
 
 } //end of listOfJumpes
 
-//permite atirnarea programului pentru "Sec" secunde
-void sleep(unsigned int Sec) {
-	clock_t ticks1 = clock(), ticks2 = ticks1;
-	while ((ticks2 / CLOCKS_PER_SEC - ticks1 / CLOCKS_PER_SEC) < Sec)
-		ticks2 = clock();
-}
-
-//converteste coordonatele in locatie
-std::pair<int, int> coordsToIndex(int x, int y) {
-	std::pair<int, int> location;
-	for (location.first = 0; location.first < R; location.first++)
-		for (location.second = 0; location.second < C; location.second++)
-			if (x < _board[location.first][location.second].x + 30 && x > _board[location.first][location.second].x - 30 && y < _board[location.first][location.second].y + 30 && y > _board[location.first][location.second].y - 30)
-				return location;
-}
-
-
 
 //fixeaza coordonatele cursorului, chiar daca nu se apasa nici un buton
 void passiveMotion(int x, int y) {
@@ -790,27 +749,7 @@ void passiveMotion(int x, int y) {
 	glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
-//initializarea tablei de dame din fisierul "joc.check"
-void initFromFile() {
-	FILE* in;
-	fopen_s(&in, "joc.check", "r");
-	if (!in) {
-		glutDestroyWindow(WIN);
-		exit(1);
-	}
 
-	fscanf_s(in, "%d %d %d %d %d %d %d %d %d %d", &mouse::SIDE_COEF, &mouse::MOUSEX, &mouse::MOUSEY, &sel.first, &sel.second, &to.first, &to.second, &GO, &POS_MOVES, &HELP);
-
-	int i, j, check, type;
-	for (i = 0; i < R; i++)
-		for (j = 0; j < C; j++) {
-			fscanf_s(in, "%f %f %d %d", &_board[i][j].x, &_board[i][j].y, &check, &type);
-			_board[i][j].check = check;
-			_board[i][j].type = type;
-		}
-
-	fclose(in);
-}
 
 //initializarea tablei de dame -=Joc Nou=-
 void boardInit() {
@@ -883,13 +822,7 @@ int countCheckers(int checker) {
 	return count;
 }
 
-//copie informatia tablei pentru a putea face undo()
-void copyArray(struct square from[R][C], struct square to[R][C]) {
-	int i, j;
-	for (i = 0; i < R; i++)
-		for (j = 0; j < C; j++)
-			to[i][j] = from[i][j];
-}
+
 
 //definirea si structurarea meniului
 void createMenu() {
@@ -961,19 +894,6 @@ void actionMenu(int option) {
 
 	glutPostRedisplay();
 }
-
-//returneaza 1 daca informatia de pe doua table este la fel, pentru undo()
-int areIdentic(struct square a[R][C], struct square b[R][C]) {
-	int i, j;
-	for (i = 0; i < R; i++)
-		for (j = 0; j < C; j++)
-			if (a[i][j].check != b[i][j].check || a[i][j].type != b[i][j].type)
-				return 0;
-	return 1;
-}
-
-//citirea datelor de la tastatura
-//in cazul meu, doar "Esc" pentru iesire
 
 
 //desenarea grafica a tuturor miscarilor posibile

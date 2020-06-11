@@ -140,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Application.hpp" />
+    <ClInclude Include="src\data.hpp" />
     <ClInclude Include="src\Game.hpp" />
     <ClInclude Include="src\grafix.hpp" />
     <ClInclude Include="src\UIManager\keyboard.hpp" />

@@ -6,12 +6,11 @@
 #define ROWS			8
 #define COLUMNS			4
 
+#define NO_CHECKER		0
 #define BLACK_CHECKER	1
 #define WHITE_CHECKER	2
 
-#define NO_CHECKER		0
 #define CHECKER			0
-
 #define KING			1
 
 #define M_PI 3.1415926535897932384626433832795
@@ -21,12 +20,11 @@ int WIN;
 
 int TYPE1 = NO_CHECKER;
 int TYPE2 = NO_CHECKER;
-int ROTIRI = 0;
+bool ROTIRI = false;
 int GO = NO_CHECKER;
-int INDEXING = 0;
-int JUMPED = 0;
-int POS_MOVES = 0;
-int HELP = 0;
+bool JUMPED = false;
+bool POS_MOVES = false;
+bool HELP = false;
 
 
 std::list<std::pair<int, int>> jump_list;

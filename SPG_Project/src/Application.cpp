@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 	WIN = glutCreateWindow("Joc de Dame - Curcudel Eugen");
 	createMenu();
 
-	keyboard::WIN = WIN;
+	uimanager::WIN = WIN;
 	glClearColor(0.9, 0.9, 0.9, 0.9);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -38,31 +38,30 @@ int main(int argc, char** argv) {
 	glutPassiveMotionFunc(passiveMotion);
 	glutDisplayFunc(display);
 	timer(0);
-	glutMouseFunc(mouse::mouse_listener);
-	glutMotionFunc(mouse::motion_listener);
-	glutKeyboardFunc(keyboard::keyboard_listener);
+	glutMouseFunc(uimanager::mouse_listener);
+	glutMotionFunc(uimanager::motion_listener);
+	glutKeyboardFunc(uimanager::keyboard_listener);
 	glutMainLoop();
 }
 
 
-//este rechemata recursiv pe parcursul programului
-//si permite lucrul in timp real
+//recursive call during the program
 void timer(int s) {
 	if (!checkList.empty()) checkList.clear();
 	if (!jumpList.empty()) jumpList.clear();
 	if (!moveList.empty()) moveList.clear();
 	
 
-	listOfJumpes(jumpList, checkList);
-	listOfMoves(moveList);
+	list_of_jumpes(jumpList, checkList);
+	list_of_moves(moveList);
 
 	display();
 
 	int i, j;
-	for (i = 0; i < R; i++)
-		for (j = 0; j < C; j++)
-			if (mouse::MOUSEX < _board[i][j].x + 30 && mouse::MOUSEX > _board[i][j].x - 30 && mouse::MOUSEY < _board[i][j].y + 30 && mouse::MOUSEY > _board[i][j].y - 30)
-				if (mouse::PRESSED) {
+	for (i = 0; i < ROWS; i++)
+		for (j = 0; j < COLUMNS; j++)
+			if (uimanager::MOUSEX < _board[i][j].x + 30 && uimanager::MOUSEX > _board[i][j].x - 30 && uimanager::MOUSEY < _board[i][j].y + 30 && uimanager::MOUSEY > _board[i][j].y - 30)
+				if (uimanager::PRESSED) {
 					to.first = i;
 					to.second = j;
 				}
@@ -70,9 +69,8 @@ void timer(int s) {
 
 	if (sel.first != -1 && to.first != -1) {
 		copyArray(_board, _undoBoard);
-		if (moveIsLegal(1))
-			putChecker(); //recursie indirecta catre putChecker() care va redirectiona spre 
-						//timer() in caz ca jucatorul are o serie de sarituri
+		if (move_is_legal(1))
+			putChecker(); 
 	}
 
 
@@ -91,11 +89,11 @@ void putChecker() {
 
 	if (!jumpList.empty()) jumpList.clear();
 
-	listOfJumpes(jumpList, checkList);
+	list_of_jumpes(jumpList, checkList);
 
 	if (JUMPED && listContainElement(jumpList, to.first, to.second)) {
 		JUMPED = 0;
-		mouse::PRESSED = 0;
+		uimanager::PRESSED = 0;
 
 		sel.first = to.first;
 		sel.second = to.second;
@@ -106,18 +104,18 @@ void putChecker() {
 
 		GO = (GO == WHITE_CHECKER) ? BLACK_CHECKER : WHITE_CHECKER;
 		JUMPED = 0;
-		mouse::PRESSED = 0;
+		uimanager::PRESSED = 0;
 
 		display();
 
 		if (ROTIRI) {
 			sleep(1);
 			glRotatef(180, 0, 0, 1);
-			mouse::SIDE_COEF *= -1;
+			uimanager::SIDE_COEF *= -1;
 		}
 		sel.first = sel.second = -1;
 		to.first = to.second = -1;
-		mouse::MOUSEX = mouse::MOUSEY = -240;
+		uimanager::MOUSEX = uimanager::MOUSEY = -240;
 	}
 }
 
@@ -125,11 +123,11 @@ void putChecker() {
 //fixeaza coordonatele cursorului, chiar daca nu se apasa nici un buton
 void passiveMotion(int x, int y) {
 	int i, j;
-	x = (x - 275) * mouse::SIDE_COEF;
-	y = (y - 275) * (-1) * mouse::SIDE_COEF;
+	x = (x - 275) * uimanager::SIDE_COEF;
+	y = (y - 275) * (-1) * uimanager::SIDE_COEF;
 
-	for (i = 0; i < R; i++)
-		for (j = 0; j < C; j++) {
+	for (i = 0; i < ROWS; i++)
+		for (j = 0; j < COLUMNS; j++) {
 			//sageata cursorului devine "std::mina" sau "drag" deasupra pieselor
 			if (_board[i][j].check != NO_CHECKER && x < _board[i][j].x + 30 && x > _board[i][j].x - 30 && y < _board[i][j].y + 30 && y > _board[i][j].y - 30) {
 				glutSetCursor(GLUT_CURSOR_INFO);
@@ -145,13 +143,13 @@ void passiveMotion(int x, int y) {
 void boardInit() {
 	int i, j, s = -240;
 	float x, y;
-	mouse::SIDE_COEF = 1;
-	mouse::MOUSEX = mouse::MOUSEY = -241;
+	uimanager::SIDE_COEF = 1;
+	uimanager::MOUSEX = uimanager::MOUSEY = -241;
 	sel.first = sel.second = -1;
 	to.first = to.second = -1;
 
-	for (i = 0; i < R; i++) {
-		for (j = 0; j < C; j++) {
+	for (i = 0; i < ROWS; i++) {
+		for (j = 0; j < COLUMNS; j++) {
 
 			x = (float)s + j * 120;
 			y = (float)-240 + i * 60;
@@ -180,26 +178,9 @@ void undo() {
 	GO = (GO == WHITE_CHECKER) ? BLACK_CHECKER : WHITE_CHECKER;
 	if (ROTIRI) {
 		glRotatef(180, 0, 0, 1);
-		mouse::SIDE_COEF *= -1;
+		uimanager::SIDE_COEF *= -1;
 	}
 	glutPostRedisplay();
-}
-
-//returneaza true daca piesele de tip "checker" nu mai au nici o miscare
-bool noMoreMoves(int checker) {
-
-	for (auto it = moveList.begin(); it != moveList.end(); ++it) {
-		if (_board[it->first][it->second].check == checker) {
-			return false;
-		}
-	}
-
-	for (auto it = checkList.begin(); it != checkList.end(); ++it) {
-		if (_board[it->first][it->second].check == checker) {
-			return false;
-		}
-	}
-	return true;
 }
 
 
@@ -234,7 +215,7 @@ void actionMenu(int option) {
 		glutDestroyWindow(WIN);
 		exit(0);
 	case 1:
-		if (mouse::SIDE_COEF == -1)
+		if (uimanager::SIDE_COEF == -1)
 			glRotatef(180, 0, 0, 1);
 		TYPE1 = WHITE_CHECKER;
 		TYPE2 = BLACK_CHECKER;
@@ -245,12 +226,12 @@ void actionMenu(int option) {
 		TYPE1 = WHITE_CHECKER;
 		TYPE2 = BLACK_CHECKER;
 		initFromFile();
-		if (mouse::SIDE_COEF == -1)
+		if (uimanager::SIDE_COEF == -1)
 			glRotatef(180, 0, 0, 1);
 		break;
 	case 3:
-		mouse::SIDE_COEF *= -1;
-		mouse::MOUSEX = mouse::MOUSEY = -241;
+		uimanager::SIDE_COEF *= -1;
+		uimanager::MOUSEX = uimanager::MOUSEY = -241;
 		sel.first = sel.second = -1;
 		glRotatef(180, 0, 0, 1);
 		break;
@@ -288,7 +269,7 @@ void drawPossibleMoves() {
 				sel.second = it->second;
 				to.first = i;
 				to.second = j;
-				if (moveIsLegal(0)) {
+				if (move_is_legal(0)) {
 					if (JUMPED) {
 						(GO == WHITE_CHECKER) ? glColor3f(0, 1, 0) : glColor3f(1, 0, 0);
 						glBegin(GL_LINES);
@@ -310,7 +291,7 @@ void drawPossibleMoves() {
 						sel.second = it->second;
 						to.first = i;
 						to.second = j;
-						if (moveIsLegal(0)) {
+						if (move_is_legal(0)) {
 							if (!JUMPED) {
 								(GO == WHITE_CHECKER) ? glColor3f(0, 1, 0) : glColor3f(1, 0, 0);
 								glBegin(GL_LINES);
@@ -339,8 +320,8 @@ void display() {
 	int i, j, s;
 	float x, y;
 
-	for (i = 0; i < R; i++) {
-		for (j = 0; j < C; j++) {
+	for (i = 0; i < ROWS; i++) {
+		for (j = 0; j < COLUMNS; j++) {
 			//desenam cite un patrat
 			glBegin(GL_QUADS);
 			glColor3f(0, 0, 0);
@@ -366,10 +347,10 @@ void display() {
 				continue;
 
 			//selectarea unei piese
-			if (_board[i][j].check == GO && mouse::MOUSEX < _board[i][j].x + 30 && mouse::MOUSEX > _board[i][j].x - 30 && mouse::MOUSEY < _board[i][j].y + 30 && mouse::MOUSEY > _board[i][j].y - 30) {
+			if (_board[i][j].check == GO && uimanager::MOUSEX < _board[i][j].x + 30 && uimanager::MOUSEX > _board[i][j].x - 30 && uimanager::MOUSEY < _board[i][j].y + 30 && uimanager::MOUSEY > _board[i][j].y - 30) {
 				if (!jumpList.empty()) {
 					if (listContainElement(jumpList, i, j) && _board[i][j].check == GO) {
-						if (mouse::PRESSED) {
+						if (uimanager::PRESSED) {
 							sel.first = i;
 							sel.second = j;
 						}
@@ -385,7 +366,7 @@ void display() {
 
 				else if (!moveList.empty()) {
 					if (listContainElement(moveList, i, j)) {
-						if (mouse::PRESSED) {
+						if (uimanager::PRESSED) {
 							sel.first = i;
 							sel.second = j;
 						}
@@ -431,14 +412,14 @@ void display() {
 					glColor3f(0.0, 0.0, 1.0);
 				else if (_board[i][j].check == BLACK_CHECKER)
 					glColor3f(0.9, 0.1, 0.1);
-				glVertex2f(*mx, *my - 10 * mouse::SIDE_COEF);
-				glVertex2f(*mx + 10, *my - 10 * mouse::SIDE_COEF);
-				glVertex2f(*mx + 10, *my + 10 * mouse::SIDE_COEF);
-				glVertex2f(*mx + 5, *my - 5 * mouse::SIDE_COEF);
-				glVertex2f(*mx, *my + 10 * mouse::SIDE_COEF);
-				glVertex2f(*mx - 5, *my - 5 * mouse::SIDE_COEF);
-				glVertex2f(*mx - 10, *my + 10 * mouse::SIDE_COEF);
-				glVertex2f(*mx - 10, *my - 10 * mouse::SIDE_COEF);
+				glVertex2f(*mx, *my - 10 * uimanager::SIDE_COEF);
+				glVertex2f(*mx + 10, *my - 10 * uimanager::SIDE_COEF);
+				glVertex2f(*mx + 10, *my + 10 * uimanager::SIDE_COEF);
+				glVertex2f(*mx + 5, *my - 5 * uimanager::SIDE_COEF);
+				glVertex2f(*mx, *my + 10 * uimanager::SIDE_COEF);
+				glVertex2f(*mx - 5, *my - 5 * uimanager::SIDE_COEF);
+				glVertex2f(*mx - 10, *my + 10 * uimanager::SIDE_COEF);
+				glVertex2f(*mx - 10, *my - 10 * uimanager::SIDE_COEF);
 				glEnd();
 
 				free(mx);
@@ -450,7 +431,7 @@ void display() {
 
 	//desenam cifrele din stinga tablei, literele de jos
 	//si doua linii de contur
-	drawAround(mouse::SIDE_COEF);
+	drawAround(uimanager::SIDE_COEF);
 
 	//Desenam toate miscarile posibile daca exista
 	if (POS_MOVES)
@@ -458,9 +439,9 @@ void display() {
 
 	//desenam output-ul meniului "Ajutor"
 	if (HELP) {
-		showHelp(mouse::SIDE_COEF);
-		if (mouse::PRESSED) {
-			if (mouse::MOUSEX * mouse::SIDE_COEF > 190 && mouse::MOUSEY * mouse::SIDE_COEF > 140 && mouse::MOUSEX * mouse::SIDE_COEF < 210 && mouse::MOUSEY * mouse::SIDE_COEF < 160) {
+		showHelp(uimanager::SIDE_COEF);
+		if (uimanager::PRESSED) {
+			if (uimanager::MOUSEX * uimanager::SIDE_COEF > 190 && uimanager::MOUSEY * uimanager::SIDE_COEF > 140 && uimanager::MOUSEX * uimanager::SIDE_COEF < 210 && uimanager::MOUSEY * uimanager::SIDE_COEF < 160) {
 				HELP = 0;
 			}
 		}
@@ -470,26 +451,26 @@ void display() {
 		if (!jumpList.empty()) jumpList.clear();
 		if (!moveList.empty()) moveList.clear();
 
-		listOfJumpes(jumpList, checkList);
-		listOfMoves(moveList);
+		list_of_jumpes(jumpList, checkList);
+		list_of_moves(moveList);
 
 		//desenam intro Joc de Dame de Curcudel Eugen, la inceput de joc
 		if (TYPE1 == TYPE2)
-			showIntro(mouse::SIDE_COEF);
+			showIntro(uimanager::SIDE_COEF);
 		else {
 			//afisam invingatorul sau detinatorul de miscare in timpul dat
-			if (countCheckers(WHITE_CHECKER) == 0 || noMoreMoves(WHITE_CHECKER)) {
-				showWiner("Negrele au invins!", mouse::SIDE_COEF);
-				showTurn("Negrele au invins!", mouse::SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
+			if (count_checkers(WHITE_CHECKER) == 0 || no_more_moves(WHITE_CHECKER)) {
+				showWiner("Negrele au invins!", uimanager::SIDE_COEF);
+				showTurn("Negrele au invins!", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			}
-			else if (countCheckers(BLACK_CHECKER) == 0 || noMoreMoves(BLACK_CHECKER)) {
-				showWiner("Albele au invins!", mouse::SIDE_COEF);
-				showTurn("Albele au invins!", mouse::SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
+			else if (count_checkers(BLACK_CHECKER) == 0 || no_more_moves(BLACK_CHECKER)) {
+				showWiner("Albele au invins!", uimanager::SIDE_COEF);
+				showTurn("Albele au invins!", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			}
 			else if (GO == WHITE_CHECKER)
-				showTurn("Albele merg", mouse::SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
+				showTurn("Albele merg", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			else if (GO == BLACK_CHECKER)
-				showTurn("Negrele merg", mouse::SIDE_COEF, countCheckers(WHITE_CHECKER), countCheckers(BLACK_CHECKER));
+				showTurn("Negrele merg", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 		}
 	}
 

@@ -1,5 +1,6 @@
 #pragma once
 
+
 //prototipurile functiilor de text grafic
 void showIntro(int c);
 void showWiner(const char*, int);

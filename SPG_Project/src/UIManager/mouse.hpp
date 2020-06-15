@@ -1,7 +1,7 @@
 #pragma once
 #include <GL\freeglut_std.h>
 
-namespace mouse {
+namespace uimanager {
 	int MOUSEX = 0;
 	int MOUSEY = 0;
 	int PRESSED = 0;

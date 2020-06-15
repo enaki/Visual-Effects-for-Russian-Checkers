@@ -4,8 +4,8 @@
 #include <list>
 
 //definirea constantelor
-#define R				8
-#define C				4
+#define ROWS			8
+#define COLUMNS			4
 #define BLACK_CHECKER	1
 #define WHITE_CHECKER	2
 #define NO_CHECKER		0
@@ -38,6 +38,6 @@ struct square {
 	unsigned int check : 2;
 	bool type : 1;
 };
-square _board[R][C], _undoBoard[R][C];
+square _board[ROWS][COLUMNS], _undoBoard[ROWS][COLUMNS];
 
 std::pair<int, int> sel, to;

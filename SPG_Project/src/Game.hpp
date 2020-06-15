@@ -1,19 +1,17 @@
 #pragma once
 #include "utilities.hpp"
 
-int countCheckers(int);
-int moveIsLegal(int);
-void listOfJumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<int, int>>& checkList);
-void listOfMoves(std::list<std::pair<int, int>>& moveList);
+int count_checkers(int);
+int move_is_legal(int);
+void list_of_jumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<int, int>>& checkList);
+void list_of_moves(std::list<std::pair<int, int>>& moveList);
 
-bool noMoreMoves(int);
+bool no_more_moves(unsigned int);
 
 //completarea cozii mListFirst cu piese care pot efectua miscari
-void listOfMoves(std::list<std::pair<int, int>>& moveList) {
-	int i, j;
-
-	for (i = 0; i < R; i++) {
-		for (j = 0; j < C; j++) {
+void list_of_moves(std::list<std::pair<int, int>>& moveList) {
+	for (int i = 0; i < ROWS; i++) {
+		for (int j = 0; j < COLUMNS; j++) {
 			if (_board[i][j].check != NO_CHECKER) {
 				int k;
 				if (i % 2)
@@ -21,18 +19,18 @@ void listOfMoves(std::list<std::pair<int, int>>& moveList) {
 				else
 					k = j - 1;
 				if (_board[i][j].type == KING) {
-					if ((_board[i + 1][j].check == NO_CHECKER && i + 1 < R) ||
+					if ((_board[i + 1][j].check == NO_CHECKER && i + 1 < ROWS) ||
 						(_board[i - 1][j].check == NO_CHECKER && i - 1 >= 0) ||
-						(_board[i + 1][k].check == NO_CHECKER && i + 1 < R && k < C && k >= 0) ||
-						(_board[i - 1][k].check == NO_CHECKER && i - 1 >= 0 && k < C && k >= 0)) {
+						(_board[i + 1][k].check == NO_CHECKER && i + 1 < ROWS && k < COLUMNS && k >= 0) ||
+						(_board[i - 1][k].check == NO_CHECKER && i - 1 >= 0 && k < COLUMNS && k >= 0)) {
 						moveList.push_back(std::make_pair(i, j));
 					} //if lung
 				} //if KING
 				if (_board[i][j].type == CHECKER) {
-					if ((_board[i + 1][j].check == NO_CHECKER && i + 1 < R && _board[i][j].check == WHITE_CHECKER) ||
+					if ((_board[i + 1][j].check == NO_CHECKER && i + 1 < ROWS && _board[i][j].check == WHITE_CHECKER) ||
 						(_board[i - 1][j].check == NO_CHECKER && i - 1 >= 0 && _board[i][j].check == BLACK_CHECKER) ||
-						(_board[i + 1][k].check == NO_CHECKER && i + 1 < R && k < C && k >= 0 && _board[i][j].check == WHITE_CHECKER) ||
-						(_board[i - 1][k].check == NO_CHECKER && i - 1 >= 0 && k < C && k >= 0 && _board[i][j].check == BLACK_CHECKER)) {
+						(_board[i + 1][k].check == NO_CHECKER && i + 1 < ROWS && k < COLUMNS && k >= 0 && _board[i][j].check == WHITE_CHECKER) ||
+						(_board[i - 1][k].check == NO_CHECKER && i - 1 >= 0 && k < COLUMNS && k >= 0 && _board[i][j].check == BLACK_CHECKER)) {
 						moveList.push_back(std::make_pair(i, j));
 
 					} //if lung
@@ -42,11 +40,11 @@ void listOfMoves(std::list<std::pair<int, int>>& moveList) {
 	} //for i	
 } //end listOfMoves
 //completarea cozii jListFirst cu piesele care trebuie sa sara
-void listOfJumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<int, int>>& checkList) {
+void list_of_jumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<int, int>>& checkList) {
 	int i, j;
 
-	for (i = 0; i < R; i++) {
-		for (j = 0; j < C; j++) {
+	for (i = 0; i < ROWS; i++) {
+		for (j = 0; j < COLUMNS; j++) {
 			if (_board[i][j].check != NO_CHECKER) {
 				int k, s;
 				if (i % 2) {
@@ -59,10 +57,10 @@ void listOfJumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<
 				}
 
 				if (_board[i][j].type == CHECKER) {
-					if ((_board[i + 1][j].check != NO_CHECKER && _board[i + 1][j].check != _board[i][j].check && _board[i + 2][s].check == NO_CHECKER && i + 2 < R && s < C && s >= 0) ||
-						(_board[i - 1][j].check != NO_CHECKER && _board[i - 1][j].check != _board[i][j].check && _board[i - 2][s].check == NO_CHECKER && i - 2 >= 0 && s < C && s >= 0) ||
-						(_board[i + 1][k].check != NO_CHECKER && _board[i + 1][k].check != _board[i][j].check && _board[i + 2][k].check == NO_CHECKER && i + 2 < R && k < C && k >= 0) ||
-						(_board[i - 1][k].check != NO_CHECKER && _board[i - 1][k].check != _board[i][j].check && _board[i - 2][k].check == NO_CHECKER && i - 2 >= 0 && k < C && k >= 0)) {
+					if ((_board[i + 1][j].check != NO_CHECKER && _board[i + 1][j].check != _board[i][j].check && _board[i + 2][s].check == NO_CHECKER && i + 2 < ROWS && s < COLUMNS && s >= 0) ||
+						(_board[i - 1][j].check != NO_CHECKER && _board[i - 1][j].check != _board[i][j].check && _board[i - 2][s].check == NO_CHECKER && i - 2 >= 0 && s < COLUMNS && s >= 0) ||
+						(_board[i + 1][k].check != NO_CHECKER && _board[i + 1][k].check != _board[i][j].check && _board[i + 2][k].check == NO_CHECKER && i + 2 < ROWS && k < COLUMNS && k >= 0) ||
+						(_board[i - 1][k].check != NO_CHECKER && _board[i - 1][k].check != _board[i][j].check && _board[i - 2][k].check == NO_CHECKER && i - 2 >= 0 && k < COLUMNS && k >= 0)) {
 						if (_board[i][j].check == GO)
 							jumpList.push_back(std::make_pair(i, j));
 						checkList.push_back(std::make_pair(i, j));
@@ -85,7 +83,7 @@ void listOfJumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<
 					}
 
 					int need = 0;
-					for (; s < C; k++) {
+					for (; s < COLUMNS; k++) {
 						++need;
 
 						if (k == i && s == j)
@@ -106,7 +104,7 @@ void listOfJumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<
 
 						if (count == 1) {
 							++k;
-							if (_board[k][s].check == NO_CHECKER && k < R && s < C)
+							if (_board[k][s].check == NO_CHECKER && k < ROWS && s < COLUMNS)
 								if (_board[i][j].check == GO)
 									jumpList.push_back(std::make_pair(i, j));
 							checkList.push_back(std::make_pair(i, j));
@@ -146,7 +144,7 @@ void listOfJumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<
 
 						if (count == 1) {
 							++k;
-							if (_board[k][s].check == NO_CHECKER && k < R && s >= 0)
+							if (_board[k][s].check == NO_CHECKER && k < ROWS && s >= 0)
 								if (_board[i][j].check == GO)
 									jumpList.push_back(std::make_pair(i, j));
 							checkList.push_back(std::make_pair(i, j));
@@ -191,7 +189,7 @@ void listOfJumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<
 
 						if (count == 1) {
 							--k;
-							if (_board[k][s].check == NO_CHECKER && k >= 0 && s < C)
+							if (_board[k][s].check == NO_CHECKER && k >= 0 && s < COLUMNS)
 								if (_board[i][j].check == GO)
 									jumpList.push_back(std::make_pair(i, j));
 							checkList.push_back(std::make_pair(i, j));
@@ -254,17 +252,17 @@ void listOfJumpes(std::list<std::pair<int, int>>& jumpList, std::list<std::pair<
 
 
 //returneaza numarul de piese de tip "checker"
-int countCheckers(int checker) {
+int count_checkers(int checker) {
 	int i, j, count = 0;
-	for (i = 0; i < R; i++)
-		for (j = 0; j < C; j++)
+	for (i = 0; i < ROWS; i++)
+		for (j = 0; j < COLUMNS; j++)
 			if (_board[i][j].check == checker)
 				++count;
 	return count;
 }
 
 //returneaza 1 daca miscarea efectuata de user este posibila, 0 in caz contrar
-int moveIsLegal(int p) {
+int move_is_legal(int p) {
 	int ret = 0;
 	JUMPED = 0;
 	if (_board[sel.first][sel.second].type == CHECKER) {
@@ -383,7 +381,7 @@ int moveIsLegal(int p) {
 
 			if (to.first > sel.first && to.second >= j) { //daca ma duc in dreapta sus
 				int need = 0;
-				for (; j < C; i++) {
+				for (; j < COLUMNS; i++) {
 					++need;
 
 					if (i == sel.first && j == sel.second)
@@ -628,4 +626,24 @@ end:
 	else
 		return ret;
 
+}
+
+
+//returneaza true daca piesele de tip "checker" nu mai au nici o miscare
+bool no_more_moves(const unsigned int checker) {
+
+	for (auto& it : moveList)
+	{
+		if (_board[it.first][it.second].check == checker) {
+			return false;
+		}
+	}
+
+	for (auto& it : checkList)
+	{
+		if (_board[it.first][it.second].check == checker) {
+			return false;
+		}
+	}
+	return true;
 }

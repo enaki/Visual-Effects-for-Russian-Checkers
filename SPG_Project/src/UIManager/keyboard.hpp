@@ -1,7 +1,7 @@
 #pragma once
 #include <GL\freeglut_std.h>
 
-namespace keyboard{
+namespace uimanager{
 	int WIN;
 	
 	void keyboard_listener(unsigned char key, int x, int y) {
@@ -12,4 +12,3 @@ namespace keyboard{
 		}
 	}
 };
-

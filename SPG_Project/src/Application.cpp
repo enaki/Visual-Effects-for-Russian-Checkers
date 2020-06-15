@@ -3,17 +3,16 @@
 #endif
 #include <GL/glut.h>
 #include <math.h>
-#include <time.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "Application.hpp"
-#include "utilities.hpp"
+#include "Application.h"
+#include "utilities.h"
 #include "grafix.hpp"
 #include <queue>
 #include <algorithm>
 #include <list>
-#include "data.hpp"
-#include "Game.hpp"
+#include "data.h"
+#include "Game.h"
 
 
 //functia main in care initializam rutina OpenGL si Glut
@@ -26,16 +25,16 @@ int main(int argc, char** argv) {
 	glutInitWindowSize(550, 550);
 	glutInitWindowPosition(100, 100);
 	WIN = glutCreateWindow("Joc de Dame - Curcudel Eugen");
-	createMenu();
+	create_menu();
 
 	uimanager::WIN = WIN;
 	glClearColor(0.9, 0.9, 0.9, 0.9);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-275.0, 275.0, -275.0, 275.0, 0.0, 1.0);
-	boardInit();
+	board_init();
 
-	glutPassiveMotionFunc(passiveMotion);
+	glutPassiveMotionFunc(passive_motion);
 	glutDisplayFunc(display);
 	timer(0);
 	glutMouseFunc(uimanager::mouse_listener);
@@ -47,20 +46,19 @@ int main(int argc, char** argv) {
 
 //recursive call during the program
 void timer(int s) {
-	if (!checkList.empty()) checkList.clear();
-	if (!jumpList.empty()) jumpList.clear();
-	if (!moveList.empty()) moveList.clear();
+	if (!check_list.empty()) check_list.clear();
+	if (!jump_list.empty()) jump_list.clear();
+	if (!move_list.empty()) move_list.clear();
 	
 
-	list_of_jumpes(jumpList, checkList);
-	list_of_moves(moveList);
+	list_of_jumpes(jump_list, check_list);
+	list_of_moves(move_list);
 
 	display();
 
-	int i, j;
-	for (i = 0; i < ROWS; i++)
-		for (j = 0; j < COLUMNS; j++)
-			if (uimanager::MOUSEX < _board[i][j].x + 30 && uimanager::MOUSEX > _board[i][j].x - 30 && uimanager::MOUSEY < _board[i][j].y + 30 && uimanager::MOUSEY > _board[i][j].y - 30)
+	for (auto i = 0; i < ROWS; i++)
+		for (auto j = 0; j < COLUMNS; j++)
+			if (uimanager::MOUSEX < board[i][j].x + 30 && uimanager::MOUSEX > board[i][j].x - 30 && uimanager::MOUSEY < board[i][j].y + 30 && uimanager::MOUSEY > board[i][j].y - 30)
 				if (uimanager::PRESSED) {
 					to.first = i;
 					to.second = j;
@@ -68,9 +66,9 @@ void timer(int s) {
 
 
 	if (sel.first != -1 && to.first != -1) {
-		copyArray(_board, _undoBoard);
+		copy_array(board, undo_board);
 		if (move_is_legal(1))
-			putChecker(); 
+			put_checker(); 
 	}
 
 
@@ -80,18 +78,18 @@ void timer(int s) {
 
 
 //daca o miscare este posibila, atunci aceasta este efectuata
-void putChecker() {
-	_board[to.first][to.second].check = _board[sel.first][sel.second].check;
-	_board[to.first][to.second].type = _board[sel.first][sel.second].type;
-	_board[sel.first][sel.second].check = NO_CHECKER;
-	_board[sel.first][sel.second].type = CHECKER;
+void put_checker() {
+	board[to.first][to.second].check = board[sel.first][sel.second].check;
+	board[to.first][to.second].type = board[sel.first][sel.second].type;
+	board[sel.first][sel.second].check = NO_CHECKER;
+	board[sel.first][sel.second].type = CHECKER;
 
 
-	if (!jumpList.empty()) jumpList.clear();
+	if (!jump_list.empty()) jump_list.clear();
 
-	list_of_jumpes(jumpList, checkList);
+	list_of_jumpes(jump_list, check_list);
 
-	if (JUMPED && listContainElement(jumpList, to.first, to.second)) {
+	if (JUMPED && list_contain_element(jump_list, to.first, to.second)) {
 		JUMPED = 0;
 		uimanager::PRESSED = 0;
 
@@ -121,7 +119,7 @@ void putChecker() {
 
 
 //fixeaza coordonatele cursorului, chiar daca nu se apasa nici un buton
-void passiveMotion(int x, int y) {
+void passive_motion(int x, int y) {
 	int i, j;
 	x = (x - 275) * uimanager::SIDE_COEF;
 	y = (y - 275) * (-1) * uimanager::SIDE_COEF;
@@ -129,7 +127,7 @@ void passiveMotion(int x, int y) {
 	for (i = 0; i < ROWS; i++)
 		for (j = 0; j < COLUMNS; j++) {
 			//sageata cursorului devine "std::mina" sau "drag" deasupra pieselor
-			if (_board[i][j].check != NO_CHECKER && x < _board[i][j].x + 30 && x > _board[i][j].x - 30 && y < _board[i][j].y + 30 && y > _board[i][j].y - 30) {
+			if (board[i][j].check != NO_CHECKER && x < board[i][j].x + 30 && x > board[i][j].x - 30 && y < board[i][j].y + 30 && y > board[i][j].y - 30) {
 				glutSetCursor(GLUT_CURSOR_INFO);
 				return;
 			}
@@ -140,41 +138,38 @@ void passiveMotion(int x, int y) {
 
 
 //initializarea tablei de dame -=Joc Nou=-
-void boardInit() {
-	int i, j, s = -240;
-	float x, y;
+void board_init() {
+	int s = -240;
 	uimanager::SIDE_COEF = 1;
 	uimanager::MOUSEX = uimanager::MOUSEY = -241;
 	sel.first = sel.second = -1;
 	to.first = to.second = -1;
 
-	for (i = 0; i < ROWS; i++) {
-		for (j = 0; j < COLUMNS; j++) {
+	for (auto i = 0; i < ROWS; i++) {
+		for (auto j = 0; j < COLUMNS; j++) {
+			auto x = static_cast<float>(s) + j * 120;
+			auto y = static_cast<float>(-240) + i * 60;
 
-			x = (float)s + j * 120;
-			y = (float)-240 + i * 60;
-
-			_board[i][j].x = x + 30;
-			_board[i][j].y = y + 30;
+			board[i][j].x = x + 30;
+			board[i][j].y = y + 30;
 			if (i < 3)
-				_board[i][j].check = TYPE1; //white checker
+				board[i][j].check = TYPE1; //white checker
 			else if (i > 4)
-				_board[i][j].check = TYPE2; //black checker
+				board[i][j].check = TYPE2; //black checker
 			else
-				_board[i][j].check = NO_CHECKER; //empty, no ckecker
+				board[i][j].check = NO_CHECKER; //empty, no ckecker
 
-			_board[i][j].type = CHECKER; //not King  
-
+			board[i][j].type = CHECKER; //not King  
 		}
 
 		s = (s == -240) ? -180 : -240;
 	}
-	copyArray(_board, _undoBoard);
+	copy_array(board, undo_board);
 }
 
 //da programul inapoi cu o miscare
 void undo() {
-	copyArray(_undoBoard, _board);
+	copy_array(undo_board, board);
 	GO = (GO == WHITE_CHECKER) ? BLACK_CHECKER : WHITE_CHECKER;
 	if (ROTIRI) {
 		glRotatef(180, 0, 0, 1);
@@ -186,8 +181,8 @@ void undo() {
 
 
 //definirea si structurarea meniului
-void createMenu() {
-	int options = glutCreateMenu(actionMenu);
+void create_menu() {
+	int options = glutCreateMenu(action_menu);
 
 	//submeniul "Optiuni"
 	glutAddMenuEntry("Rotire 180", 3);
@@ -195,7 +190,7 @@ void createMenu() {
 	glutAddMenuEntry("Miscari Posibile on/off", 7);
 	glutAddMenuEntry("Undo", 6);
 
-	int menuId = glutCreateMenu(actionMenu);
+	int menuId = glutCreateMenu(action_menu);
 
 	glutAddMenuEntry("Joc Nou", 1);
 	glutAddMenuEntry("Continuare Joc", 2);
@@ -209,7 +204,7 @@ void createMenu() {
 }
 
 //actiunile la selectarea optiunilor din meniu
-void actionMenu(int option) {
+void action_menu(int option) {
 	switch (option) {
 	case 0:
 		glutDestroyWindow(WIN);
@@ -220,12 +215,12 @@ void actionMenu(int option) {
 		TYPE1 = WHITE_CHECKER;
 		TYPE2 = BLACK_CHECKER;
 		GO = WHITE_CHECKER;
-		boardInit();
+		board_init();
 		break;
 	case 2:
 		TYPE1 = WHITE_CHECKER;
 		TYPE2 = BLACK_CHECKER;
-		initFromFile();
+		init_from_file();
 		if (uimanager::SIDE_COEF == -1)
 			glRotatef(180, 0, 0, 1);
 		break;
@@ -239,10 +234,10 @@ void actionMenu(int option) {
 		ROTIRI = ROTIRI ? 0 : 1;
 		break;
 	case 5:
-		saveToFile();
+		save_to_file();
 		break;
 	case 6:
-		if (!areIdentic(_undoBoard, _board))
+		if (!are_identic(undo_board, board))
 			undo();
 		break;
 	case 7:
@@ -251,6 +246,7 @@ void actionMenu(int option) {
 	case 8:
 		HELP = 1;
 		break;
+	default: break;
 	}
 
 	glutPostRedisplay();
@@ -258,23 +254,24 @@ void actionMenu(int option) {
 
 
 //desenarea grafica a tuturor miscarilor posibile
-void drawPossibleMoves() {
+void draw_possible_moves() {
 	int i, j, ver = 1;
 	int a = sel.first, b = sel.second, c = to.first, d = to.second, e = JUMPED;
 	
-	for (auto it = jumpList.begin(); it != jumpList.end(); ++it) {
+	for (auto& it : jump_list)
+	{
 		for (i = 0; i < 8; i++)
 			for (j = 0; j < 4; j++) {
-				sel.first = it->first;
-				sel.second = it->second;
+				sel.first = it.first;
+				sel.second = it.second;
 				to.first = i;
 				to.second = j;
 				if (move_is_legal(0)) {
 					if (JUMPED) {
 						(GO == WHITE_CHECKER) ? glColor3f(0, 1, 0) : glColor3f(1, 0, 0);
 						glBegin(GL_LINES);
-						glVertex2f(_board[sel.first][sel.second].x, _board[sel.first][sel.second].y);
-						glVertex2f(_board[to.first][to.second].x, _board[to.first][to.second].y);
+						glVertex2f(board[sel.first][sel.second].x, board[sel.first][sel.second].y);
+						glVertex2f(board[to.first][to.second].x, board[to.first][to.second].y);
 						glEnd();
 						ver = 0;
 					}
@@ -283,20 +280,21 @@ void drawPossibleMoves() {
 	}
 
 	if (ver) {
-		for (auto it = moveList.begin(); it != moveList.end(); ++it) {
+		for (auto& it : move_list)
+		{
 			for (i = 0; i < 8; i++)
 				for (j = 0; j < 4; j++) {
-					if (_board[it->first][it->second].check == GO) {
-						sel.first = it->first;
-						sel.second = it->second;
+					if (board[it.first][it.second].check == GO) {
+						sel.first = it.first;
+						sel.second = it.second;
 						to.first = i;
 						to.second = j;
 						if (move_is_legal(0)) {
 							if (!JUMPED) {
 								(GO == WHITE_CHECKER) ? glColor3f(0, 1, 0) : glColor3f(1, 0, 0);
 								glBegin(GL_LINES);
-								glVertex2f(_board[sel.first][sel.second].x, _board[sel.first][sel.second].y);
-								glVertex2f(_board[to.first][to.second].x, _board[to.first][to.second].y);
+								glVertex2f(board[sel.first][sel.second].x, board[sel.first][sel.second].y);
+								glVertex2f(board[to.first][to.second].x, board[to.first][to.second].y);
 								glEnd();
 							}
 						}
@@ -325,56 +323,56 @@ void display() {
 			//desenam cite un patrat
 			glBegin(GL_QUADS);
 			glColor3f(0, 0, 0);
-			glVertex2f(_board[i][j].x - 30, _board[i][j].y - 30);
-			glVertex2f(_board[i][j].x + 30, _board[i][j].y - 30);
-			glVertex2f(_board[i][j].x + 30, _board[i][j].y + 30);
-			glVertex2f(_board[i][j].x - 30, _board[i][j].y + 30);
+			glVertex2f(board[i][j].x - 30, board[i][j].y - 30);
+			glVertex2f(board[i][j].x + 30, board[i][j].y - 30);
+			glVertex2f(board[i][j].x + 30, board[i][j].y + 30);
+			glVertex2f(board[i][j].x - 30, board[i][j].y + 30);
 			glEnd();
 
 			//transformam piesele in dame daca ajung in partea opusa
-			if (i == 0 && _board[i][j].check == TYPE2)//'B')
-				_board[i][j].type = KING;
+			if (i == 0 && board[i][j].check == TYPE2)//'B')
+				board[i][j].type = KING;
 
-			if (i == 7 && _board[i][j].check == TYPE1)//'W')
-				_board[i][j].type = KING;
+			if (i == 7 && board[i][j].check == TYPE1)//'W')
+				board[i][j].type = KING;
 
 			//coloram piesele in dependenta de tip
-			if (_board[i][j].check == WHITE_CHECKER)
+			if (board[i][j].check == WHITE_CHECKER)
 				glColor3f(1.0, 1.0, 1.0); //Albe
-			else if (_board[i][j].check == BLACK_CHECKER)
+			else if (board[i][j].check == BLACK_CHECKER)
 				glColor3f(0.2, 0.2, 0.8); //Albastre
 			else
 				continue;
 
 			//selectarea unei piese
-			if (_board[i][j].check == GO && uimanager::MOUSEX < _board[i][j].x + 30 && uimanager::MOUSEX > _board[i][j].x - 30 && uimanager::MOUSEY < _board[i][j].y + 30 && uimanager::MOUSEY > _board[i][j].y - 30) {
-				if (!jumpList.empty()) {
-					if (listContainElement(jumpList, i, j) && _board[i][j].check == GO) {
+			if (board[i][j].check == GO && uimanager::MOUSEX < board[i][j].x + 30 && uimanager::MOUSEX > board[i][j].x - 30 && uimanager::MOUSEY < board[i][j].y + 30 && uimanager::MOUSEY > board[i][j].y - 30) {
+				if (!jump_list.empty()) {
+					if (list_contain_element(jump_list, i, j) && board[i][j].check == GO) {
 						if (uimanager::PRESSED) {
 							sel.first = i;
 							sel.second = j;
 						}
 
 						//culoarea pieselor selectate in dependenta de tip
-						if (_board[i][j].check == BLACK_CHECKER)
+						if (board[i][j].check == BLACK_CHECKER)
 							glColor3f(0.2, 0.2, 0.6); //violeta
-						if (_board[i][j].check == WHITE_CHECKER)
+						if (board[i][j].check == WHITE_CHECKER)
 							glColor3f(0.7, 0.7, 0.7); //surie
 					}
 
 				}
 
-				else if (!moveList.empty()) {
-					if (listContainElement(moveList, i, j)) {
+				else if (!move_list.empty()) {
+					if (list_contain_element(move_list, i, j)) {
 						if (uimanager::PRESSED) {
 							sel.first = i;
 							sel.second = j;
 						}
 
 						//culoarea pieselor selectate in dependenta de tip
-						if (_board[i][j].check == BLACK_CHECKER)
+						if (board[i][j].check == BLACK_CHECKER)
 							glColor3f(0.2, 0.2, 0.6); //violeta
-						if (_board[i][j].check == WHITE_CHECKER)
+						if (board[i][j].check == WHITE_CHECKER)
 							glColor3f(0.7, 0.7, 0.7); //surie
 					}
 
@@ -386,7 +384,7 @@ void display() {
 			//conform formulelor parametrice a cercului
 			glBegin(GL_POLYGON);
 			for (x = 0; x <= 2 * M_PI; x += 0.77) {
-				glVertex2f(25 * cos(x) + (_board[i][j].x - 30 + _board[i][j].x + 30) / 2, 25 * sin(x) + (_board[i][j].y - 30 + _board[i][j].y + 30) / 2);
+				glVertex2f(25 * cos(x) + (board[i][j].x - 30 + board[i][j].x + 30) / 2, 25 * sin(x) + (board[i][j].y - 30 + board[i][j].y + 30) / 2);
 			}
 			glEnd();
 
@@ -398,19 +396,19 @@ void display() {
 
 			//desenam coronita la dame
 			//coordonatele virfurilor deduse de std::mine
-			if (_board[i][j].type == KING) {
+			if (board[i][j].type == KING) {
 				float* mx = (float*)malloc(sizeof(float));
 				float* my = (float*)malloc(sizeof(float));
 				if (!mx || !my) {
 					glutDestroyWindow(WIN);
 					exit(1);
 				}
-				*mx = _board[i][j].x;
-				*my = _board[i][j].y;
+				*mx = board[i][j].x;
+				*my = board[i][j].y;
 				glBegin(GL_POLYGON);
-				if (_board[i][j].check == WHITE_CHECKER)
+				if (board[i][j].check == WHITE_CHECKER)
 					glColor3f(0.0, 0.0, 1.0);
-				else if (_board[i][j].check == BLACK_CHECKER)
+				else if (board[i][j].check == BLACK_CHECKER)
 					glColor3f(0.9, 0.1, 0.1);
 				glVertex2f(*mx, *my - 10 * uimanager::SIDE_COEF);
 				glVertex2f(*mx + 10, *my - 10 * uimanager::SIDE_COEF);
@@ -435,7 +433,7 @@ void display() {
 
 	//Desenam toate miscarile posibile daca exista
 	if (POS_MOVES)
-		drawPossibleMoves();
+		draw_possible_moves();
 
 	//desenam output-ul meniului "Ajutor"
 	if (HELP) {
@@ -447,12 +445,12 @@ void display() {
 		}
 	}
 	else {
-		if (!checkList.empty()) checkList.clear();
-		if (!jumpList.empty()) jumpList.clear();
-		if (!moveList.empty()) moveList.clear();
+		if (!check_list.empty()) check_list.clear();
+		if (!jump_list.empty()) jump_list.clear();
+		if (!move_list.empty()) move_list.clear();
 
-		list_of_jumpes(jumpList, checkList);
-		list_of_moves(moveList);
+		list_of_jumpes(jump_list, check_list);
+		list_of_moves(move_list);
 
 		//desenam intro Joc de Dame de Curcudel Eugen, la inceput de joc
 		if (TYPE1 == TYPE2)

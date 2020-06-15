@@ -1,25 +1,26 @@
 #pragma once
 #include <queue>
 #include <algorithm>
-#include "data.hpp"
-#include "UIManager/keyboard.hpp"
-#include "UIManager/mouse.hpp"
+#include <time.h>
+#include "data.h"
+#include "UIManager/keyboard.h"
+#include "UIManager/mouse.h"
 
 template <typename T>
-void clearQueue(std::queue<T>& q)
+void clear_queue(std::queue<T>& q)
 {
     std::queue<T> empty;
     std::swap(q, empty);
 }
 
 template <typename T>
-bool listContainElement(std::list<std::pair<T, T>>& list, T pair_item_1, T pair_item_2)
+bool list_contain_element(std::list<std::pair<T, T>>& list, T pair_item_1, T pair_item_2)
 {
     return std::find(list.begin(), list.end(), std::make_pair(pair_item_1, pair_item_2)) != list.end();
 }
 
 //copie informatia tablei pentru a putea face undo()
-void copyArray(struct square from[ROWS][COLUMNS], struct square to[ROWS][COLUMNS]) {
+void copy_array(struct square from[ROWS][COLUMNS], struct square to[ROWS][COLUMNS]) {
 	int i, j;
 	for (i = 0; i < ROWS; i++)
 		for (j = 0; j < COLUMNS; j++)
@@ -27,7 +28,7 @@ void copyArray(struct square from[ROWS][COLUMNS], struct square to[ROWS][COLUMNS
 }
 
 //returneaza 1 daca informatia de pe doua table este la fel, pentru undo()
-int areIdentic(struct square a[ROWS][COLUMNS], struct square b[ROWS][COLUMNS]) {
+int are_identic(struct square a[ROWS][COLUMNS], struct square b[ROWS][COLUMNS]) {
 	int i, j;
 	for (i = 0; i < ROWS; i++)
 		for (j = 0; j < COLUMNS; j++)
@@ -37,23 +38,23 @@ int areIdentic(struct square a[ROWS][COLUMNS], struct square b[ROWS][COLUMNS]) {
 }
 
 //permite atirnarea programului pentru "Sec" secunde
-void sleep(unsigned int Sec) {
+void sleep(unsigned int sec) {
 	clock_t ticks1 = clock(), ticks2 = ticks1;
-	while ((ticks2 / CLOCKS_PER_SEC - ticks1 / CLOCKS_PER_SEC) < Sec)
+	while ((ticks2 / CLOCKS_PER_SEC - ticks1 / CLOCKS_PER_SEC) < sec)
 		ticks2 = clock();
 }
 
 //converteste coordonatele in locatie
-std::pair<int, int> coordsToIndex(int x, int y) {
+std::pair<int, int> coords_to_index(int x, int y) {
 	std::pair<int, int> location;
 	for (location.first = 0; location.first < ROWS; location.first++)
 		for (location.second = 0; location.second < COLUMNS; location.second++)
-			if (x < _board[location.first][location.second].x + 30 && x > _board[location.first][location.second].x - 30 && y < _board[location.first][location.second].y + 30 && y > _board[location.first][location.second].y - 30)
+			if (x < board[location.first][location.second].x + 30 && x > board[location.first][location.second].x - 30 && y < board[location.first][location.second].y + 30 && y > board[location.first][location.second].y - 30)
 				return location;
 }
 
 //initializarea tablei de dame din fisierul "joc.check"
-void initFromFile() {
+void init_from_file() {
 	FILE* in;
 	fopen_s(&in, "joc.check", "r");
 	if (!in) {
@@ -63,12 +64,12 @@ void initFromFile() {
 
 	fscanf_s(in, "%d %d %d %d %d %d %d %d %d %d", &uimanager::SIDE_COEF, &uimanager::MOUSEX, &uimanager::MOUSEY, &sel.first, &sel.second, &to.first, &to.second, &GO, &POS_MOVES, &HELP);
 
-	int i, j, check, type;
-	for (i = 0; i < ROWS; i++)
-		for (j = 0; j < COLUMNS; j++) {
-			fscanf_s(in, "%f %f %d %d", &_board[i][j].x, &_board[i][j].y, &check, &type);
-			_board[i][j].check = check;
-			_board[i][j].type = type;
+	int check, type;
+	for (auto i = 0; i < ROWS; i++)
+		for (auto j = 0; j < COLUMNS; j++) {
+			fscanf_s(in, "%f %f %d %d", &board[i][j].x, &board[i][j].y, &check, &type);
+			board[i][j].check = check;
+			board[i][j].type = type;
 		}
 
 	fclose(in);
@@ -76,7 +77,7 @@ void initFromFile() {
 
 
 //functia de salvare in fisier
-void saveToFile() {
+void save_to_file() {
 	FILE* out;
 	fopen_s(&out, "joc.check", "w");
 	if (!out) {
@@ -86,10 +87,9 @@ void saveToFile() {
 
 	fprintf(out, "%d %d %d %d %d %d %d %d %d %d", uimanager::SIDE_COEF, uimanager::MOUSEX, uimanager::MOUSEY, sel.first, sel.second, to.first, to.second, GO, POS_MOVES, HELP);
 
-	int i, j;
-	for (i = 0; i < ROWS; i++)
-		for (j = 0; j < COLUMNS; j++)
-			fprintf(out, "%f %f %d %d\n", _board[i][j].x, _board[i][j].y, _board[i][j].check, _board[i][j].type);
+	for (auto i = 0; i < ROWS; i++)
+		for (auto j = 0; j < COLUMNS; j++)
+			fprintf(out, "%f %f %d %d\n", board[i][j].x, board[i][j].y, board[i][j].check, board[i][j].type);
 
 	fclose(out);
 }

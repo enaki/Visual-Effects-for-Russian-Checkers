@@ -139,13 +139,13 @@
     <None Include="src\vertex.vert" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Application.hpp" />
-    <ClInclude Include="src\data.hpp" />
-    <ClInclude Include="src\Game.hpp" />
+    <ClInclude Include="src\Application.h" />
+    <ClInclude Include="src\data.h" />
+    <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\grafix.hpp" />
-    <ClInclude Include="src\UIManager\keyboard.hpp" />
-    <ClInclude Include="src\UIManager\mouse.hpp" />
-    <ClInclude Include="src\utilities.hpp" />
+    <ClInclude Include="src\UIManager\keyboard.h" />
+    <ClInclude Include="src\UIManager\mouse.h" />
+    <ClInclude Include="src\utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

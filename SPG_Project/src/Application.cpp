@@ -1,8 +1,4 @@
-#ifdef __WIN32___
-	#include <windows.h>
-#endif
 #include <GL/glut.h>
-#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "Application.h"
@@ -17,14 +13,11 @@
 
 //functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
-#ifdef __WIN32__
-	FreeConsole();
-#endif
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(550, 550);
 	glutInitWindowPosition(100, 100);
-	WIN = glutCreateWindow("Joc de Dame - Curcudel Eugen");
+	WIN = glutCreateWindow("Russian Checkers");
 	create_menu();
 
 	uimanager::WIN = WIN;
@@ -64,7 +57,6 @@ void timer(int s) {
 					to.second = j;
 				}
 
-
 	if (sel.first != -1 && to.first != -1) {
 		copy_array(board, undo_board);
 		if (move_is_legal(1))
@@ -90,7 +82,7 @@ void put_checker() {
 	list_of_jumpes(jump_list, check_list);
 
 	if (JUMPED && list_contain_element(jump_list, to.first, to.second)) {
-		JUMPED = 0;
+		JUMPED = false;
 		uimanager::PRESSED = 0;
 
 		sel.first = to.first;
@@ -101,7 +93,7 @@ void put_checker() {
 	else {
 
 		GO = (GO == WHITE_CHECKER) ? BLACK_CHECKER : WHITE_CHECKER;
-		JUMPED = 0;
+		JUMPED = false;
 		uimanager::PRESSED = 0;
 
 		display();
@@ -120,12 +112,11 @@ void put_checker() {
 
 //fixeaza coordonatele cursorului, chiar daca nu se apasa nici un buton
 void passive_motion(int x, int y) {
-	int i, j;
 	x = (x - 275) * uimanager::SIDE_COEF;
 	y = (y - 275) * (-1) * uimanager::SIDE_COEF;
 
-	for (i = 0; i < ROWS; i++)
-		for (j = 0; j < COLUMNS; j++) {
+	for (auto i = 0; i < ROWS; i++)
+		for (auto j = 0; j < COLUMNS; j++) {
 			//sageata cursorului devine "std::mina" sau "drag" deasupra pieselor
 			if (board[i][j].check != NO_CHECKER && x < board[i][j].x + 30 && x > board[i][j].x - 30 && y < board[i][j].y + 30 && y > board[i][j].y - 30) {
 				glutSetCursor(GLUT_CURSOR_INFO);
@@ -134,7 +125,6 @@ void passive_motion(int x, int y) {
 		}
 	glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
-
 
 
 //initializarea tablei de dame -=Joc Nou=-
@@ -147,8 +137,8 @@ void board_init() {
 
 	for (auto i = 0; i < ROWS; i++) {
 		for (auto j = 0; j < COLUMNS; j++) {
-			auto x = static_cast<float>(s) + j * 120;
-			auto y = static_cast<float>(-240) + i * 60;
+			const auto x = static_cast<float>(s) + 120 * j;
+			const auto y = static_cast<float>(-240) + 60 * i;
 
 			board[i][j].x = x + 30;
 			board[i][j].y = y + 30;
@@ -177,7 +167,6 @@ void undo() {
 	}
 	glutPostRedisplay();
 }
-
 
 
 //definirea si structurarea meniului
@@ -231,7 +220,7 @@ void action_menu(int option) {
 		glRotatef(180, 0, 0, 1);
 		break;
 	case 4:
-		ROTIRI = ROTIRI ? 0 : 1;
+		ROTIRI = !ROTIRI;
 		break;
 	case 5:
 		save_to_file();
@@ -241,10 +230,10 @@ void action_menu(int option) {
 			undo();
 		break;
 	case 7:
-		POS_MOVES = (POS_MOVES) ? 0 : 1;
+		POS_MOVES = !POS_MOVES;
 		break;
 	case 8:
-		HELP = 1;
+		HELP = true;
 		break;
 	default: break;
 	}
@@ -255,13 +244,13 @@ void action_menu(int option) {
 
 //desenarea grafica a tuturor miscarilor posibile
 void draw_possible_moves() {
-	int i, j, ver = 1;
+	int ver = 1;
 	int a = sel.first, b = sel.second, c = to.first, d = to.second, e = JUMPED;
 	
 	for (auto& it : jump_list)
 	{
-		for (i = 0; i < 8; i++)
-			for (j = 0; j < 4; j++) {
+		for (auto i = 0; i < ROWS; i++)
+			for (auto j = 0; j < COLUMNS; j++) {
 				sel.first = it.first;
 				sel.second = it.second;
 				to.first = i;
@@ -282,8 +271,8 @@ void draw_possible_moves() {
 	if (ver) {
 		for (auto& it : move_list)
 		{
-			for (i = 0; i < 8; i++)
-				for (j = 0; j < 4; j++) {
+			for (auto i = 0; i < ROWS; i++)
+				for (auto j = 0; j < COLUMNS; j++) {
 					if (board[it.first][it.second].check == GO) {
 						sel.first = it.first;
 						sel.second = it.second;
@@ -315,11 +304,11 @@ void display() {
 	//curatam ecranul
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	int i, j, s;
+	int s;
 	float x, y;
 
-	for (i = 0; i < ROWS; i++) {
-		for (j = 0; j < COLUMNS; j++) {
+	for (auto i = 0; i < ROWS; i++) {
+		for (auto j = 0; j < COLUMNS; j++) {
 			//desenam cite un patrat
 			glBegin(GL_QUADS);
 			glColor3f(0, 0, 0);
@@ -388,40 +377,25 @@ void display() {
 			}
 			glEnd();
 
-			//semnificatii:
-			//x-30 x sting
-			//x+30 x drept
-			//y-30 y jos
-			//y+30 y sus
-
 			//desenam coronita la dame
 			//coordonatele virfurilor deduse de std::mine
 			if (board[i][j].type == KING) {
-				float* mx = (float*)malloc(sizeof(float));
-				float* my = (float*)malloc(sizeof(float));
-				if (!mx || !my) {
-					glutDestroyWindow(WIN);
-					exit(1);
-				}
-				*mx = board[i][j].x;
-				*my = board[i][j].y;
+				auto mx = board[i][j].x;
+				auto my = board[i][j].y;
 				glBegin(GL_POLYGON);
 				if (board[i][j].check == WHITE_CHECKER)
 					glColor3f(0.0, 0.0, 1.0);
 				else if (board[i][j].check == BLACK_CHECKER)
 					glColor3f(0.9, 0.1, 0.1);
-				glVertex2f(*mx, *my - 10 * uimanager::SIDE_COEF);
-				glVertex2f(*mx + 10, *my - 10 * uimanager::SIDE_COEF);
-				glVertex2f(*mx + 10, *my + 10 * uimanager::SIDE_COEF);
-				glVertex2f(*mx + 5, *my - 5 * uimanager::SIDE_COEF);
-				glVertex2f(*mx, *my + 10 * uimanager::SIDE_COEF);
-				glVertex2f(*mx - 5, *my - 5 * uimanager::SIDE_COEF);
-				glVertex2f(*mx - 10, *my + 10 * uimanager::SIDE_COEF);
-				glVertex2f(*mx - 10, *my - 10 * uimanager::SIDE_COEF);
+				glVertex2f(mx, my - 10 * uimanager::SIDE_COEF);
+				glVertex2f(mx + 10, my - 10 * uimanager::SIDE_COEF);
+				glVertex2f(mx + 10, my + 10 * uimanager::SIDE_COEF);
+				glVertex2f(mx + 5, my - 5 * uimanager::SIDE_COEF);
+				glVertex2f(mx, my + 10 * uimanager::SIDE_COEF);
+				glVertex2f(mx - 5, my - 5 * uimanager::SIDE_COEF);
+				glVertex2f(mx - 10, my + 10 * uimanager::SIDE_COEF);
+				glVertex2f(mx - 10, my - 10 * uimanager::SIDE_COEF);
 				glEnd();
-
-				free(mx);
-				free(my);
 			}
 
 		}
@@ -440,7 +414,7 @@ void display() {
 		showHelp(uimanager::SIDE_COEF);
 		if (uimanager::PRESSED) {
 			if (uimanager::MOUSEX * uimanager::SIDE_COEF > 190 && uimanager::MOUSEY * uimanager::SIDE_COEF > 140 && uimanager::MOUSEX * uimanager::SIDE_COEF < 210 && uimanager::MOUSEY * uimanager::SIDE_COEF < 160) {
-				HELP = 0;
+				HELP = false;
 			}
 		}
 	}
@@ -466,12 +440,11 @@ void display() {
 				showTurn("Albele au invins!", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			}
 			else if (GO == WHITE_CHECKER)
-				showTurn("Albele merg", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				showTurn("White's turn", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			else if (GO == BLACK_CHECKER)
-				showTurn("Negrele merg", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				showTurn("Black's turn", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 		}
 	}
-
 	//curatam ecranul si schimbam buferele
 	glFlush();
 	glutSwapBuffers();

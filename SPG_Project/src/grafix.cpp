@@ -2,6 +2,8 @@
 #include <GL/glut.h>
 #include "grafix.hpp"
 
+#include <string>
+
 //functia care arata la intrarea in joc numele autorului
 void showIntro(int c) {
 	//desenam un patrat suriu
@@ -16,38 +18,28 @@ void showIntro(int c) {
 
 	//scrim in patratul desenat mai sus
 	int i;
-	char string[] = "Joc de Dame";
+	std::string str1 = "Russian Checkers";
 	glColor3f(0.6, 0.6, 0.6);
 	glRasterPos2f(-55 * c, 25 * c);
-	for (i = 0; i < strlen(string); i++)
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
+	for (i = 0; i < str1.size(); i++)
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str1[i]);
 
 	glColor3f(0.1, 0.2, 0.2);
 	glRasterPos2f(-60 * c, 30 * c);
-	for (i = 0; i < strlen(string); i++)
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
+	for (i = 0; i < str1.size(); i++)
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str1[i]);
 
-	char string2[] = "de Curcudel Eugen";
-	glColor3f(0.6, 0.6, 0.6);
-	glRasterPos2f(-90 * c, -5 * c);
-	for (i = 0; i < strlen(string2); i++)
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string2[i]);
 
-	glColor3f(0.1, 0.2, 0.2);
-	glRasterPos2f(-95 * c, 0);
-	for (i = 0; i < strlen(string2); i++)
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string2[i]);
-
-	char string3[] = "Un Joc Placut!";
+	std::string str2 = "Have fun!";
 	glColor3f(0.6, 0.6, 0.6);
 	glRasterPos2f(-65 * c, -35 * c);
-	for (i = 0; i < strlen(string3); i++)
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string3[i]);
+	for (i = 0; i < str2.size(); i++)
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str2[i]);
 
 	glColor3f(0.1, 0.2, 0.2);
 	glRasterPos2f(-70 * c, -40 * c);
-	for (i = 0; i < strlen(string3); i++)
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string3[i]);
+	for (i = 0; i < str2.size(); i++)
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str2[i]);
 }
 
 //Afiseaza un mesaj cind este un cistigator
@@ -98,40 +90,24 @@ void showHelp(int c) {
 	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'x');
 
 	//afisam mesajele
-	char string[] = "- Acest program este un simplu joc de";
-	char string2[] = "dame care urmeaza regulile rusesti";
-	char string3[] = "- Pentru informatii despre reguli vizitati:";
-	char string4[] = "http://ro.wikipedia.org/wiki/Dame";
-	char string5[] = "- Sau contactati autorul:";
-	char string6[] = "CurcudelEugen@gmail.com";
+	std::string str1 = "Russian Checkers";
+	std::string str2 = "Fore more info:";
+	std::string str3 = "https://en.wikipedia.org/wiki/Russian_draughts";
 	int i;
 
 	glColor3f(0.3, 0.4, 0.3);
 	//string
 	glRasterPos2f(-180 * c, 110 * c);
-	for (i = 0; i < strlen(string); i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string[i]);
+	for (i = 0; i < str1.size(); i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, str1[i]);
 	//string2
 	glRasterPos2f(-180 * c, 90 * c);
-	for (i = 0; i < strlen(string2); i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string2[i]);
+	for (i = 0; i < str2.size(); i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, str2[i]);
 	//string3
 	glRasterPos2f(-180 * c, 50 * c);
-	for (i = 0; i < strlen(string3); i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string3[i]);
-	//string4
-	glRasterPos2f(-180 * c, 10 * c);
-	for (i = 0; i < strlen(string4); i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string4[i]);
-	//string5
-	glRasterPos2f(-180 * c, -30 * c);
-	for (i = 0; i < strlen(string5); i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string5[i]);
-	//string6
-	glRasterPos2f(-180 * c, -70 * c);
-	for (i = 0; i < strlen(string6); i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string6[i]);
-
+	for (i = 0; i < str3.size(); i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, str3[i]);
 }
 
 //deseneaza cifrele si literele in jurul tablei
@@ -181,12 +157,12 @@ void showTurn(const char* s, int c, int white, int black) {
 	for (i = 0; i < strlen(s); i++)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, s[i]);
 
-	char string[] = "Albe: ";
-	char string1[] = "Negre: ";
+	std::string str1 = "White: ";
+	std::string str2 = "Black: ";
 	//afisam cite piese Albe sunt
 	glRasterPos2f(-240 * c, 255 * c);
-	for (i = 0; i < strlen(string); i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string[i]);
+	for (i = 0; i < str1.size(); i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, str1[i]);
 
 	glRasterPos2f(-190 * c, 255 * c);
 	if (white > 9)
@@ -195,8 +171,8 @@ void showTurn(const char* s, int c, int white, int black) {
 
 	//afisam cite piese Negre sunt
 	glRasterPos2f(160 * c, 255 * c);
-	for (i = 0; i < strlen(string1); i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, string1[i]);
+	for (i = 0; i < str2.size(); i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, str2[i]);
 
 	glRasterPos2f(225 * c, 255 * c);
 	if (black > 9)

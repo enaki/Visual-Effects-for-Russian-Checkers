@@ -1,9 +1,10 @@
 #pragma once
 #include <queue>
 #include <algorithm>
+#include <fstream>
+#include <string>
 #include <time.h>
 #include "data.h"
-#include "UIManager/keyboard.h"
 #include "UIManager/mouse.h"
 
 template <typename T>
@@ -92,4 +93,17 @@ void save_to_file() {
 			fprintf(out, "%f %f %d %d\n", board[i][j].x, board[i][j].y, board[i][j].check, board[i][j].type);
 
 	fclose(out);
+}
+
+std::string textFileRead(char* fn)
+{
+	std::ifstream ifile(fn);
+	std::string filetext;
+	while (ifile.good()) {
+		std::string line;
+		std::getline(ifile, line);
+		filetext.append(line + "\n");
+	}
+	if (filetext.empty()) throw new std::exception("Empty File.");
+	return filetext;
 }

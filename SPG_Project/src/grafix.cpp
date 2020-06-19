@@ -19,7 +19,7 @@ void showIntro(int c) {
 	//scrim in patratul desenat mai sus
 	int i;
 	std::string str1 = "Russian Checkers";
-	glColor3f(0.6, 0.6, 0.6);
+	glColor3f(0.6,  0.6, 0.6);
 	glRasterPos2f(-55 * c, 25 * c);
 	for (i = 0; i < str1.size(); i++)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str1[i]);
@@ -28,7 +28,6 @@ void showIntro(int c) {
 	glRasterPos2f(-60 * c, 30 * c);
 	for (i = 0; i < str1.size(); i++)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str1[i]);
-
 
 	std::string str2 = "Have fun!";
 	glColor3f(0.6, 0.6, 0.6);

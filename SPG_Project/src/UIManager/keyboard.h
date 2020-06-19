@@ -1,5 +1,5 @@
 #pragma once
-#include <GL\freeglut_std.h>
+#include <GL/freeglut_std.h>
 
 namespace uimanager{
 	int WIN;

@@ -9,7 +9,7 @@ void action_menu(int);
 void passive_motion(int, int);
 void put_checker();
 void undo();
-
+void init();
 
 void draw_possible_moves();
 

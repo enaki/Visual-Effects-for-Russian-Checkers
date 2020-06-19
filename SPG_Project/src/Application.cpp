@@ -1,41 +1,92 @@
-#include <GL/glut.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <GL/glew.h>
+#include <GL/freeglut.h>
+
+#include <cstdlib>
 #include "Application.h"
 #include "utilities.h"
 #include "grafix.hpp"
 #include <queue>
-#include <algorithm>
 #include <list>
 #include "data.h"
 #include "Game.h"
+#include "UIManager/keyboard.h"
 
+#include <glm/mat4x4.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+GLuint shader_programme, vao;
+//varfurile triunghiului
+float points[] = {
+	0.0f,  0.5f,  0.0f,
+	0.5f, -0.5f,  0.0f,
+	-0.5f, -0.5f,  0.0f
+};
 
 //functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowSize(550, 550);
 	glutInitWindowPosition(100, 100);
 	WIN = glutCreateWindow("Russian Checkers");
-	create_menu();
+	init();
+	glutPassiveMotionFunc(passive_motion);
+	glutDisplayFunc(display);
+	glutMouseFunc(uimanager::mouse_listener);
+	glutMotionFunc(uimanager::motion_listener);
+	glutKeyboardFunc(uimanager::keyboard_listener);
+	timer(0);
+	glutMainLoop();
+}
 
+void init()
+{
+	// get version info
+	const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
+	const GLubyte* version = glGetString(GL_VERSION); // version as a string
+	printf("Renderer: %s\n", renderer);
+	printf("OpenGL version supported %s\n", version);
+
+	glewInit();
+	
+	GLuint vbo = 1;
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), points, GL_STATIC_DRAW);
+
+	vao = 0;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+	std::string vstext = textFileRead((char *)"shader/vertex.vert");
+	std::string fstext = textFileRead((char *)"shader/fragment.vert");
+	const char* vertex_shader = vstext.c_str();
+	const char* fragment_shader = fstext.c_str();
+
+	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vs, 1, &vertex_shader, NULL);
+	glCompileShader(vs);
+	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fs, 1, &fragment_shader, NULL);
+	glCompileShader(fs);
+
+	shader_programme = glCreateProgram();
+	glAttachShader(shader_programme, fs);
+	glAttachShader(shader_programme, vs);
+	glLinkProgram(shader_programme);
+	
+	create_menu();
 	uimanager::WIN = WIN;
 	glClearColor(0.9, 0.9, 0.9, 0.9);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-275.0, 275.0, -275.0, 275.0, 0.0, 1.0);
 	board_init();
-
-	glutPassiveMotionFunc(passive_motion);
-	glutDisplayFunc(display);
-	timer(0);
-	glutMouseFunc(uimanager::mouse_listener);
-	glutMotionFunc(uimanager::motion_listener);
-	glutKeyboardFunc(uimanager::keyboard_listener);
-	glutMainLoop();
 }
-
 
 //recursive call during the program
 void timer(int s) {
@@ -67,7 +118,6 @@ void timer(int s) {
 	//rechemarea recursiva a functiei timer()
 	glutTimerFunc(10, timer, 0);
 }
-
 
 //daca o miscare este posibila, atunci aceasta este efectuata
 void put_checker() {
@@ -109,7 +159,6 @@ void put_checker() {
 	}
 }
 
-
 //fixeaza coordonatele cursorului, chiar daca nu se apasa nici un buton
 void passive_motion(int x, int y) {
 	x = (x - 275) * uimanager::SIDE_COEF;
@@ -125,7 +174,6 @@ void passive_motion(int x, int y) {
 		}
 	glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
-
 
 //initializarea tablei de dame -=Joc Nou=-
 void board_init() {
@@ -167,7 +215,6 @@ void undo() {
 	}
 	glutPostRedisplay();
 }
-
 
 //definirea si structurarea meniului
 void create_menu() {
@@ -241,7 +288,6 @@ void action_menu(int option) {
 	glutPostRedisplay();
 }
 
-
 //desenarea grafica a tuturor miscarilor posibile
 void draw_possible_moves() {
 	int ver = 1;
@@ -299,6 +345,7 @@ void draw_possible_moves() {
 	JUMPED = e;
 }
 
+/*
 //functia de desenare grafica principala
 void display() {
 	//curatam ecranul
@@ -448,4 +495,34 @@ void display() {
 	//curatam ecranul si schimbam buferele
 	glFlush();
 	glutSwapBuffers();
+}
+*/
+
+void display()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	glUseProgram(shader_programme);
+
+	float rotationAngle = glm::pi<float>() / 2;
+
+
+	glm::mat4 rotationMatrix = glm::rotate(rotationAngle, glm::vec3(0, 0, 1));
+	glm::mat4 translationMatrix = glm::translate(glm::vec3(-0.5, 0, 0));
+	glm::mat4 scalationMatrix = glm::scale(glm::vec3(1, 0.5, 1));
+
+	GLuint matrixID = glGetUniformLocation(shader_programme, "modelMatrix");
+	//scalare -> rotatie -> translare
+	glm::mat4 transformationMatrix = translationMatrix * rotationMatrix * scalationMatrix;
+
+	//translare -> rotatie -> scalare
+	//glm::mat4 transformationMatrix = scalationMatrix * rotationMatrix * translationMatrix;
+
+	//se poate de incercat fiecare din combinatiile acestea pentru a vedea efectul lor
+	matrixID = glGetUniformLocation(shader_programme, "modelMatrix");
+	glUniformMatrix4fv(matrixID, 1, GL_FALSE, glm::value_ptr(transformationMatrix));
+
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+
+	glFlush();
 }

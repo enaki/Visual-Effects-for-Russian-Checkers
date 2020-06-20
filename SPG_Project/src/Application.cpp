@@ -17,7 +17,6 @@
 
 GLuint shader_programme, vao;
 GLuint vbo = 1;
-GLuint color_vbo = 2;
 float board_squares[ROWS][COLUMNS][12];
 
 
@@ -378,50 +377,33 @@ void display() {
 	
 	for (auto i = 0; i < ROWS; i++) {
 		for (auto j = 0; j < COLUMNS; j++) {
-			//desenam cite un patrat
+			//one square drawing
 			glUseProgram(shader_programme);
 			glEnableVertexAttribArray(0);
-			glEnableVertexAttribArray(1);
 			
 			auto* const current_square = board_squares[i][j];
-			float color_buffer[4] = {1.0, 0.0, 1.0, 1.0};
-
 			
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), current_square, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-			
-			glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
-			glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(float), color_buffer, GL_STATIC_DRAW);
 
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+			GLuint color_id = glGetUniformLocation(shader_programme, "color");
+			glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(1, 0, 1)));
+			
 
 			glDrawArrays(GL_QUADS, 0, 4);
 			
 			glDisableVertexAttribArray(0);
 			glUseProgram(0);
 
-			/*
-			glBegin(GL_QUADS);			  
-			glColor3f(0, 0, 0);	  
-			glVertex2f(board[i][j].x - 30, board[i][j].y - 30);
-			glVertex2f(board[i][j].x + 30, board[i][j].y - 30);
-			glVertex2f(board[i][j].x + 30, board[i][j].y + 30);
-			glVertex2f(board[i][j].x - 30, board[i][j].y + 30);
-			glEnd();
-			*/
-
-			
-			//transformam piesele in dame daca ajung in partea opusa
+			//transformation time, become queen if needed
 			if (i == 0 && board[i][j].check == TYPE2)//'B')
 				board[i][j].type = KING;
 
 			if (i == 7 && board[i][j].check == TYPE1)//'W')
 				board[i][j].type = KING;
 
-			//coloram piesele in dependenta de tip
+			//color the checkers according to type
 			if (board[i][j].check == WHITE_CHECKER)
 				glColor3f(1.0, 1.0, 1.0); //Albe
 			else if (board[i][j].check == BLACK_CHECKER)
@@ -437,7 +419,6 @@ void display() {
 							sel.first = i;
 							sel.second = j;
 						}
-
 						//culoarea pieselor selectate in dependenta de tip
 						if (board[i][j].check == BLACK_CHECKER)
 							glColor3f(0.2, 0.2, 0.6); //violeta

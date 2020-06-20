@@ -20,23 +20,23 @@ void showIntro(int c) {
 	int i;
 	std::string str1 = "Russian Checkers";
 	glColor3f(0.6,  0.6, 0.6);
-	glRasterPos2f(-55 * c, 25 * c);
+	glRasterPos2f(-85 * c, 15 * c);
 	for (i = 0; i < str1.size(); i++)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str1[i]);
 
 	glColor3f(0.1, 0.2, 0.2);
-	glRasterPos2f(-60 * c, 30 * c);
+	glRasterPos2f(-90 * c, 20 * c);
 	for (i = 0; i < str1.size(); i++)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str1[i]);
 
 	std::string str2 = "Have fun!";
 	glColor3f(0.6, 0.6, 0.6);
-	glRasterPos2f(-65 * c, -35 * c);
+	glRasterPos2f(-55 * c, -35 * c);
 	for (i = 0; i < str2.size(); i++)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str2[i]);
 
 	glColor3f(0.1, 0.2, 0.2);
-	glRasterPos2f(-70 * c, -40 * c);
+	glRasterPos2f(-60 * c, -40 * c);
 	for (i = 0; i < str2.size(); i++)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, str2[i]);
 }

@@ -369,6 +369,8 @@ void display() {
 	
 	GLuint vbo = 1;
 	glGenBuffers(1, &vbo);
+	GLuint checkers_vbo = 3;
+	glGenBuffers(1, &checkers_vbo);
 	GLuint color_vbo = 2;
 	glGenBuffers(1, &color_vbo);
 	
@@ -377,6 +379,8 @@ void display() {
 	
 	for (auto i = 0; i < ROWS; i++) {
 		for (auto j = 0; j < COLUMNS; j++) {
+			glm::vec3 color;
+			
 			//one square drawing
 			glUseProgram(shader_programme);
 			glEnableVertexAttribArray(0);
@@ -392,25 +396,24 @@ void display() {
 			
 
 			glDrawArrays(GL_QUADS, 0, 4);
-			
 			glDisableVertexAttribArray(0);
 			glUseProgram(0);
-
+			
 			//transformation time, become queen if needed
 			if (i == 0 && board[i][j].check == TYPE2)//'B')
 				board[i][j].type = KING;
 
 			if (i == 7 && board[i][j].check == TYPE1)//'W')
 				board[i][j].type = KING;
-
+			
 			//color the checkers according to type
 			if (board[i][j].check == WHITE_CHECKER)
-				glColor3f(1.0, 1.0, 1.0); //Albe
+				color = glm::vec3(1, 1, 1); //Albe
 			else if (board[i][j].check == BLACK_CHECKER)
-				glColor3f(0.2, 0.2, 0.8); //Albastre
+				color = glm::vec3(0.2, 0.2, 0.8); //Albastre
 			else
 				continue;
-
+			
 			//selectarea unei piese
 			if (board[i][j].check == GO && uimanager::MOUSEX < board[i][j].x + 30 && uimanager::MOUSEX > board[i][j].x - 30 && uimanager::MOUSEY < board[i][j].y + 30 && uimanager::MOUSEY > board[i][j].y - 30) {
 				if (!jump_list.empty()) {
@@ -421,9 +424,9 @@ void display() {
 						}
 						//culoarea pieselor selectate in dependenta de tip
 						if (board[i][j].check == BLACK_CHECKER)
-							glColor3f(0.2, 0.2, 0.6); //violeta
+							color = glm::vec3(0.2, 0.2, 0.6); //violeta
 						if (board[i][j].check == WHITE_CHECKER)
-							glColor3f(0.7, 0.7, 0.7); //surie
+							color = glm::vec3(0.7, 0.7, 0.7);	//surie
 					}
 				}
 
@@ -436,26 +439,46 @@ void display() {
 
 						//culoarea pieselor selectate in dependenta de tip
 						if (board[i][j].check == BLACK_CHECKER)
-							glColor3f(0.2, 0.2, 0.6); //violeta
+							color = glm::vec3(0.2, 0.2, 0.6);//violeta
 						if (board[i][j].check == WHITE_CHECKER)
-							glColor3f(0.7, 0.7, 0.7); //surie
+							color = glm::vec3(0.7, 0.7, 0.7);//surie
 					}
 				}
 			}
+			
 
 			//desenam piesele de joc (octagoane)
 			//conform formulelor parametrice a cercului
-			glBegin(GL_POLYGON);
-			for (x = 0; x <= 2 * M_PI; x += 0.77) {
-				glVertex2f(25 * cos(x) + (board[i][j].x - 30 + board[i][j].x + 30) / 2, 25 * sin(x) + (board[i][j].y - 30 + board[i][j].y + 30) / 2);
+			const auto circle_precision = 16;
+			float checker_positions[3 * circle_precision];
+			for (auto k = 0; k < circle_precision; k++) {
+				auto x = 2 * M_PI * k / static_cast<float>(circle_precision);
+				checker_positions[3 * k] = 25 * cos(x) + (board[i][j].x - 30 + board[i][j].x + 30) / 2;
+				checker_positions[3 * k + 1] = 25 * sin(x) + (board[i][j].y - 30 + board[i][j].y + 30) / 2;
+				checker_positions[3 * k + 2] = 0;
 			}
-			glEnd();
 
+			for (auto& checker_position : checker_positions)
+			{
+				checker_position /= 275;
+			}
+			
+			glUseProgram(shader_programme);
+			glEnableVertexAttribArray(0);
+			
+			glUniform3fv(color_id, 1, glm::value_ptr(color));
+			glBindBuffer(GL_ARRAY_BUFFER, checkers_vbo);
+			glBufferData(GL_ARRAY_BUFFER, 3 * circle_precision * sizeof(float), checker_positions, GL_STATIC_DRAW);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+			glDrawArrays(GL_POLYGON, 0, circle_precision);
+			
+			glDisableVertexAttribArray(0);
+			glUseProgram(0);
+			
 			//desenam coronita la dame
-			//coordonatele virfurilor deduse de std::mine
 			if (board[i][j].type == KING) {
-				auto mx = board[i][j].x;
-				auto my = board[i][j].y;
+				const auto mx = board[i][j].x;
+				const auto my = board[i][j].y;
 				glBegin(GL_POLYGON);
 				if (board[i][j].check == WHITE_CHECKER)
 					glColor3f(0.0, 0.0, 1.0);
@@ -471,7 +494,6 @@ void display() {
 				glVertex2f(mx - 10, my - 10 * uimanager::SIDE_COEF);
 				glEnd();
 			}
-
 		}
 	}
 
@@ -520,54 +542,3 @@ void display() {
 	}
 	glFlush();
 }
-
-
-/*
-void display()
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-	glUseProgram(shader_programme);
-
-	float rotationAngle = glm::pi<float>() / 2;
-
-
-	glm::mat4 rotationMatrix = glm::rotate(rotationAngle, glm::vec3(0, 0, 1));
-	glm::mat4 translationMatrix = glm::translate(glm::vec3(-0.5, 0, 0));
-	glm::mat4 scalationMatrix = glm::scale(glm::vec3(1, 0.5, 1));
-
-	GLuint matrixID = glGetUniformLocation(shader_programme, "modelMatrix");
-	//scalare -> rotatie -> translare
-	glm::mat4 transformationMatrix = translationMatrix * rotationMatrix * scalationMatrix;
-
-	//translare -> rotatie -> scalare
-	//glm::mat4 transformationMatrix = scalationMatrix * rotationMatrix * translationMatrix;
-
-	//se poate de incercat fiecare din combinatiile acestea pentru a vedea efectul lor
-	matrixID = glGetUniformLocation(shader_programme, "modelMatrix");
-	glUniformMatrix4fv(matrixID, 1, GL_FALSE, glm::value_ptr(transformationMatrix));
-
-	
-
-	float vertex_buffer[3 * COLUMNS] = {  -30,  -30, 0.0	  ,
-											30, -30, 0.0	  ,
-											30,  30, 0.0	  ,
-											-30, 30,  0.0};
-	GLuint vbo1 = 1;
-	glGenBuffers(1, &vbo1);
-	vao = 0;
-	glGenVertexArrays(1, &vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo1);
-	glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), vertex_buffer, GL_STATIC_DRAW);
-
-	glBindVertexArray(vao);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo1);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-	glBindVertexArray(vao);
-	glDrawArrays(GL_QUADS, 0, 4);
-
-	
-	glFlush();
-}*/

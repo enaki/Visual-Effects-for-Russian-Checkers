@@ -16,12 +16,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 GLuint shader_programme, vao;
-//varfurile triunghiului
-float points[] = {
-	0.0f,  0.5f,  0.0f,
-	0.5f, -0.5f,  0.0f,
-	-0.5f, -0.5f,  0.0f
-};
+float board_squares[ROWS][COLUMNS][12];
 
 //functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
@@ -49,18 +44,7 @@ void init()
 	printf("OpenGL version supported %s\n", version);
 
 	glewInit();
-	
-	GLuint vbo = 1;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), points, GL_STATIC_DRAW);
 
-	vao = 0;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
 	std::string vstext = textFileRead((char *)"shader/vertex.vert");
 	std::string fstext = textFileRead((char *)"shader/fragment.vert");
@@ -203,6 +187,34 @@ void board_init() {
 		s = (s == -240) ? -180 : -240;
 	}
 	copy_array(board, undo_board);
+	//load board square values
+	for (auto i = 0; i < ROWS; i++) {
+		for (auto j = 0; j < COLUMNS; j++) {
+			board_squares[i][j][0] = board[i][j].x - 30;
+			board_squares[i][j][1] = board[i][j].y - 30;
+			board_squares[i][j][2] = 0.0;
+
+			board_squares[i][j][3] = board[i][j].x + 30;
+			board_squares[i][j][4] = board[i][j].y - 30;
+			board_squares[i][j][5] = 0.0;
+
+			board_squares[i][j][6] = board[i][j].x + 30;
+			board_squares[i][j][7] = board[i][j].y + 30;
+			board_squares[i][j][8] = 0.0;
+
+			board_squares[i][j][9] = board[i][j].x - 30;
+			board_squares[i][j][10] = board[i][j].y + 30;
+			board_squares[i][j][11] = 0.0;
+		}
+	}
+
+	for (auto i = 0; i < ROWS; i++) {
+		for (auto j = 0; j < COLUMNS; j++) {
+			for (auto k = 0; k < 12; k++) {
+				board_squares[i][j][k] /= 275;
+			}
+		}
+	}
 }
 
 //da programul inapoi cu o miscare
@@ -345,26 +357,67 @@ void draw_possible_moves() {
 	JUMPED = e;
 }
 
-/*
+
 //functia de desenare grafica principala
 void display() {
 	//curatam ecranul
 	glClear(GL_COLOR_BUFFER_BIT);
-
+	glUseProgram(0);
 	int s;
 	float x, y;
-
+	
+	GLuint vbo = 1;
+	glGenBuffers(1, &vbo);
+	vao = 0;
+	glGenVertexArrays(1, &vao);
+	
 	for (auto i = 0; i < ROWS; i++) {
 		for (auto j = 0; j < COLUMNS; j++) {
 			//desenam cite un patrat
-			glBegin(GL_QUADS);
-			glColor3f(0, 0, 0);
+			glUseProgram(shader_programme);
+
+			/*float vertex_buffer[2 * COLUMNS] = {	board[i][j].x - 30, board[i][j].y - 30,
+													board[i][j].x + 30, board[i][j].y - 30,
+													board[i][j].x + 30, board[i][j].y + 30,
+													board[i][j].x - 30, board[i][j].y + 30 };*/
+			/*float current_square[3 * COLUMNS] = {	board[i][j].x - 30, board[i][j].y - 30, 0.0,
+													board[i][j].x + 30, board[i][j].y - 30, 0.0,
+													board[i][j].x + 30, board[i][j].y + 30, 0.0,
+													board[i][j].x - 30, board[i][j].y + 30, 0.0 };
+
+			for (auto& item : current_square)
+			{
+				item /= 275;
+			}*/
+			//float current_square[3 * COLUMNS];
+			//std::copy(board_squares[i][j][0], board_squares[i][j][11], current_square);
+			auto* const current_square = board_squares[i][j];
+			
+			
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), current_square, GL_STATIC_DRAW);
+			
+			glBindVertexArray(vao);
+			glEnableVertexAttribArray(0);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+			glBindVertexArray(vao);
+			glDrawArrays(GL_QUADS, 0, 4);
+			
+			glUseProgram(0);
+
+			/*
+			glBegin(GL_QUADS);			  
+			glColor3f(0, 0, 0);	  
 			glVertex2f(board[i][j].x - 30, board[i][j].y - 30);
 			glVertex2f(board[i][j].x + 30, board[i][j].y - 30);
 			glVertex2f(board[i][j].x + 30, board[i][j].y + 30);
 			glVertex2f(board[i][j].x - 30, board[i][j].y + 30);
 			glEnd();
+			*/
 
+			
 			//transformam piesele in dame daca ajung in partea opusa
 			if (i == 0 && board[i][j].check == TYPE2)//'B')
 				board[i][j].type = KING;
@@ -411,9 +464,7 @@ void display() {
 						if (board[i][j].check == WHITE_CHECKER)
 							glColor3f(0.7, 0.7, 0.7); //surie
 					}
-
 				}
-
 			}
 
 			//desenam piesele de joc (octagoane)
@@ -473,7 +524,6 @@ void display() {
 		list_of_jumpes(jump_list, check_list);
 		list_of_moves(move_list);
 
-		//desenam intro Joc de Dame de Curcudel Eugen, la inceput de joc
 		if (TYPE1 == TYPE2)
 			showIntro(uimanager::SIDE_COEF);
 		else {
@@ -492,12 +542,11 @@ void display() {
 				showTurn("Black's turn", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 		}
 	}
-	//curatam ecranul si schimbam buferele
 	glFlush();
-	glutSwapBuffers();
 }
-*/
 
+
+/*
 void display()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -521,8 +570,28 @@ void display()
 	matrixID = glGetUniformLocation(shader_programme, "modelMatrix");
 	glUniformMatrix4fv(matrixID, 1, GL_FALSE, glm::value_ptr(transformationMatrix));
 
-	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	
 
+	float vertex_buffer[3 * COLUMNS] = {  -30,  -30, 0.0	  ,
+											30, -30, 0.0	  ,
+											30,  30, 0.0	  ,
+											-30, 30,  0.0};
+	GLuint vbo1 = 1;
+	glGenBuffers(1, &vbo1);
+	vao = 0;
+	glGenVertexArrays(1, &vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo1);
+	glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), vertex_buffer, GL_STATIC_DRAW);
+
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo1);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	glBindVertexArray(vao);
+	glDrawArrays(GL_QUADS, 0, 4);
+
+	
 	glFlush();
-}
+}*/

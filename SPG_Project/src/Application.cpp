@@ -371,6 +371,8 @@ void display() {
 	glGenBuffers(1, &vbo);
 	GLuint checkers_vbo = 3;
 	glGenBuffers(1, &checkers_vbo);
+	GLuint crown_vbo = 3;
+	glGenBuffers(1, &crown_vbo);
 	GLuint color_vbo = 2;
 	glGenBuffers(1, &color_vbo);
 	
@@ -445,7 +447,6 @@ void display() {
 					}
 				}
 			}
-			
 
 			//desenam piesele de joc (octagoane)
 			//conform formulelor parametrice a cercului
@@ -479,20 +480,38 @@ void display() {
 			if (board[i][j].type == KING) {
 				const auto mx = board[i][j].x;
 				const auto my = board[i][j].y;
-				glBegin(GL_POLYGON);
+
+				float crown[3 * 8] = {
+					mx,			my - 10 * uimanager::SIDE_COEF,	 0.0f,
+					mx + 10,	my - 10 * uimanager::SIDE_COEF,	 0.0f,
+					mx + 10,	my + 10 * uimanager::SIDE_COEF,	 0.0f,
+					mx + 5,		my - 5 * uimanager::SIDE_COEF,	 0.0f,
+					mx,			my + 10 * uimanager::SIDE_COEF,	 0.0f,
+					mx - 5,		my - 5 * uimanager::SIDE_COEF,	 0.0f,
+					mx - 10,	my + 10 * uimanager::SIDE_COEF,	 0.0f,
+					mx - 10,	my - 10 * uimanager::SIDE_COEF,	 0.0f
+				};
+				for (auto& crown_angle : crown)
+				{
+					crown_angle /= 275;
+				}
+
 				if (board[i][j].check == WHITE_CHECKER)
-					glColor3f(0.0, 0.0, 1.0);
+					color = glm::vec3(0.0, 0.0, 1.0);
 				else if (board[i][j].check == BLACK_CHECKER)
-					glColor3f(0.9, 0.1, 0.1);
-				glVertex2f(mx, my - 10 * uimanager::SIDE_COEF);
-				glVertex2f(mx + 10, my - 10 * uimanager::SIDE_COEF);
-				glVertex2f(mx + 10, my + 10 * uimanager::SIDE_COEF);
-				glVertex2f(mx + 5, my - 5 * uimanager::SIDE_COEF);
-				glVertex2f(mx, my + 10 * uimanager::SIDE_COEF);
-				glVertex2f(mx - 5, my - 5 * uimanager::SIDE_COEF);
-				glVertex2f(mx - 10, my + 10 * uimanager::SIDE_COEF);
-				glVertex2f(mx - 10, my - 10 * uimanager::SIDE_COEF);
-				glEnd();
+					color = glm::vec3(0.9, 0.1, 0.1);
+				
+				glUseProgram(shader_programme);
+				glEnableVertexAttribArray(0);
+
+				glUniform3fv(color_id, 1, glm::value_ptr(color));
+				glBindBuffer(GL_ARRAY_BUFFER, crown_vbo);
+				glBufferData(GL_ARRAY_BUFFER, 3 * 8 * sizeof(float), crown, GL_STATIC_DRAW);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+				glDrawArrays(GL_POLYGON, 0, 8);
+
+				glDisableVertexAttribArray(0);
+				glUseProgram(0);
 			}
 		}
 	}

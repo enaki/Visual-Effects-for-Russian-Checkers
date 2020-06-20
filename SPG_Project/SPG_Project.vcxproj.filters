@@ -26,8 +26,8 @@
     <None Include="src\fragment.frag" />
     <None Include="src\vertex.vert" />
     <None Include="src\joc.check" />
-    <None Include="shader\vertex.vert" />
-    <None Include="shader\fragment.vert" />
+    <None Include="shader\bsq_fragment.vert" />
+    <None Include="shader\bsq_vertex.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\grafix.hpp">

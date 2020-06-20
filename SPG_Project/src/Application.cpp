@@ -16,7 +16,10 @@
 #include <glm/gtc/type_ptr.hpp>
 
 GLuint shader_programme, vao;
+GLuint vbo = 1;
+GLuint color_vbo = 2;
 float board_squares[ROWS][COLUMNS][12];
+
 
 //functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
@@ -45,9 +48,8 @@ void init()
 
 	glewInit();
 
-
-	std::string vstext = textFileRead((char *)"shader/vertex.vert");
-	std::string fstext = textFileRead((char *)"shader/fragment.vert");
+	std::string vstext = textFileRead((char *)"shader/bsq_vertex.vert");
+	std::string fstext = textFileRead((char *)"shader/bsq_fragment.vert");
 	const char* vertex_shader = vstext.c_str();
 	const char* fragment_shader = fstext.c_str();
 
@@ -368,6 +370,9 @@ void display() {
 	
 	GLuint vbo = 1;
 	glGenBuffers(1, &vbo);
+	GLuint color_vbo = 2;
+	glGenBuffers(1, &color_vbo);
+	
 	vao = 0;
 	glGenVertexArrays(1, &vao);
 	
@@ -375,36 +380,27 @@ void display() {
 		for (auto j = 0; j < COLUMNS; j++) {
 			//desenam cite un patrat
 			glUseProgram(shader_programme);
-
-			/*float vertex_buffer[2 * COLUMNS] = {	board[i][j].x - 30, board[i][j].y - 30,
-													board[i][j].x + 30, board[i][j].y - 30,
-													board[i][j].x + 30, board[i][j].y + 30,
-													board[i][j].x - 30, board[i][j].y + 30 };*/
-			/*float current_square[3 * COLUMNS] = {	board[i][j].x - 30, board[i][j].y - 30, 0.0,
-													board[i][j].x + 30, board[i][j].y - 30, 0.0,
-													board[i][j].x + 30, board[i][j].y + 30, 0.0,
-													board[i][j].x - 30, board[i][j].y + 30, 0.0 };
-
-			for (auto& item : current_square)
-			{
-				item /= 275;
-			}*/
-			//float current_square[3 * COLUMNS];
-			//std::copy(board_squares[i][j][0], board_squares[i][j][11], current_square);
-			auto* const current_square = board_squares[i][j];
+			glEnableVertexAttribArray(0);
+			glEnableVertexAttribArray(1);
 			
+			auto* const current_square = board_squares[i][j];
+			float color_buffer[4] = {1.0, 0.0, 1.0, 1.0};
+
 			
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), current_square, GL_STATIC_DRAW);
-			
-			glBindVertexArray(vao);
 			glEnableVertexAttribArray(0);
-			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+			
+			glBindBuffer(GL_ARRAY_BUFFER, color_vbo);
+			glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(float), color_buffer, GL_STATIC_DRAW);
 
-			glBindVertexArray(vao);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+
 			glDrawArrays(GL_QUADS, 0, 4);
 			
+			glDisableVertexAttribArray(0);
 			glUseProgram(0);
 
 			/*
@@ -448,7 +444,6 @@ void display() {
 						if (board[i][j].check == WHITE_CHECKER)
 							glColor3f(0.7, 0.7, 0.7); //surie
 					}
-
 				}
 
 				else if (!move_list.empty()) {

@@ -21,7 +21,7 @@
 
 GLuint lighting_shader_programme, texture_shader_programme, vao;
 GLuint vbo = 1;
-GLuint board_texture;
+GLuint board_texture, board_texture_normal;
 
 float board_squares[ROWS][COLUMNS][12];
 float full_board[32] = {
@@ -454,6 +454,7 @@ void init()
 	create_shader_program((char*)"shader/btext_vertex.shader", (char*)"shader/btext_fragment.shader", texture_shader_programme);
 
 	setTexture((char*)"textures/board.jpg", texture_shader_programme, board_texture);
+	setTexture((char*)"textures/board_normal.jpg", texture_shader_programme, board_texture_normal);
 	
 	create_menu();
 	uimanager::WIN = WIN;
@@ -507,11 +508,21 @@ void display() {
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 		glEnableVertexAttribArray(2);
 
-		GLuint texture1ID = glGetUniformLocation(texture_shader_programme, "ourTexture");
+		GLuint texture1ID = glGetUniformLocation(texture_shader_programme, "textureColor");
 		glUniform1i(texture1ID, 0);
+		GLuint texture2ID = glGetUniformLocation(texture_shader_programme, "textureNormal");
+		glUniform1i(texture2ID, 1);
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, board_texture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, board_texture_normal);
+		
+		GLuint enableNormal_1 = glGetUniformLocation(texture_shader_programme, "enableNormal");
+		glUniform1i(enableNormal_1, enableNormal);
 		GLuint lightingEn_id = glGetUniformLocation(texture_shader_programme, "enableLighting");
 		glUniform1i(lightingEn_id, enable_lighting);
+		
 		update_uniform_fragment_shader(texture_shader_programme);
 		
 		glDrawArrays(GL_QUADS, 0, 4);

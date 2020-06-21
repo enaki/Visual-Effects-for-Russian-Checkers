@@ -57,3 +57,4 @@ glm::vec3 view_pos(0, 0, 1);
 
 GLint enable_lighting = 1;
 GLint enable_texture = 1;
+GLint enableNormal = 1;

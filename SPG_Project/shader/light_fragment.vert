@@ -6,7 +6,7 @@ in vec3 pos;
 
 uniform vec3 lightPos;
 uniform vec3 viewPos;
-uniform vec3 diffuse;
+uniform vec3 color;
 
 vec3 lighting(vec3 pos, vec3 normal, vec3 lightPos, vec3 viewPos,
 				vec3 ambient, vec3 diffuse, vec3 specular, float specPower)
@@ -28,13 +28,13 @@ vec3 lighting(vec3 pos, vec3 normal, vec3 lightPos, vec3 viewPos,
 void main() 
 {
 	vec3 ambient = vec3(0.2);
-	//vec3 diffuse = vec3(1.0, 0, 0);
+	vec3 diffuse = vec3(1.0, 0, 0);
 	vec3 specular = vec3(0.8);
 	float specPower = 32;
 	
-	//vec3 color = lighting(pos, normal, lightPos, viewPos, ambient, diffuse, specular, specPower);
+	//vec3 color_process = lighting(pos, normal, lightPos, viewPos, ambient, diffuse, specular, specPower);
 				
-	fragColor = vec4(diffuse, 1.0);
+	fragColor = vec4(color, 1.0);
 
 	//fragColor = vec4(1.0, 0.0, 0.0, 1.0);
 }

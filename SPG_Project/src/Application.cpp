@@ -89,8 +89,8 @@ void init()
 	create_menu();
 	uimanager::WIN = WIN;
 	glClearColor(0.9, 0.9, 0.9, 0.9);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
 	glOrtho(-275.0, 275.0, -275.0, 275.0, 0.0, 1.0);
 	board_init();
 }
@@ -435,7 +435,7 @@ void display() {
 			glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), current_square, GL_STATIC_DRAW);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-			GLuint color_id = glGetUniformLocation(shader_programme, "diffuse");
+			GLuint color_id = glGetUniformLocation(shader_programme, "color");
 			glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(1, 0, 1)));
 
 			update_uniform_fragment_shader();

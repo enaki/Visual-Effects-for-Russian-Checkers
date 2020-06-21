@@ -50,5 +50,8 @@ glm::mat4 projectionMatrix, viewMatrix, modelMatrix;
 //glm::vec3 lightPos(0, 1, 5);
 //glm::vec3 viewPos(2, 3, 6);
 
+//glm::vec3 light_pos(0, 1, 5);
+//glm::vec3 view_pos(0, 0, 1);
+
 glm::vec3 light_pos(0, 1, 5);
-glm::vec3 view_pos(0, 0, 1);
+glm::vec3 view_pos(2, 3, 6);

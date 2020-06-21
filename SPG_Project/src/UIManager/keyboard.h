@@ -1,5 +1,6 @@
 #pragma once
 #include <GL/freeglut_std.h>
+#include "data.h"
 
 namespace uimanager{
 	int WIN;
@@ -9,6 +10,19 @@ namespace uimanager{
 		case 27:
 			glutDestroyWindow(WIN);
 			exit(0);
+		case 'w':
+			light_pos[1] += 0.5;
+			break;
+		case 'a':
+			light_pos[0] -= 0.5;
+			break;
+		case 's':
+			light_pos[1] -= 0.5;
+			break;
+		case 'd':
+			light_pos[0] += 0.5;
+			break;
 		}
+		glutPostRedisplay();
 	}
 };

@@ -28,6 +28,8 @@
     <None Include="src\joc.check" />
     <None Include="shader\bsq_fragment.vert" />
     <None Include="shader\bsq_vertex.vert" />
+    <None Include="shader\light_fragment.vert" />
+    <None Include="shader\light_vertex.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\grafix.hpp">

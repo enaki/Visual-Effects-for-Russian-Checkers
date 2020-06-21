@@ -10,7 +10,7 @@ void passive_motion(int, int);
 void put_checker();
 void undo();
 void init();
-
+void create_shader_program(char* vertex_shader_file, char* fragment_shader_path, GLuint& shader_programme);
 void update_uniform_fragment_shader();
 
 void draw_possible_moves();

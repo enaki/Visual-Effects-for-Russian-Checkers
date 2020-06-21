@@ -1,6 +1,4 @@
 #include <GL/glew.h>
-#include <GL/freeglut.h>
-
 #include <cstdlib>
 #include "Application.h"
 
@@ -14,38 +12,18 @@
 #include "Game.h"
 #include "UIManager/keyboard.h"
 
-#include <glm/mat4x4.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "Utils/stb_image.h"
 
-GLuint shader_programme, vao;
+GLuint lighting_shader_programme, texture_shader_programme, vao;
 GLuint vbo = 1;
 float board_squares[ROWS][COLUMNS][12];
 
 
 #define PI glm::pi<float>()
-
-float LIGHT = 0.5f;
-float rotAngle = 0;
-float rotAngleInc = M_PI / 64;
-
-
-void reshape(int w, int h)
-{
-	glViewport(0, 0, w, h);
-	projectionMatrix = glm::perspective(PI / 6, (float)w / h, 0.1f, 100.0f);
-	/*
-	viewMatrix este matricea transformarii de observare. Parametrii functiei
-	lookAt sunt trei vectori ce reprezinta, in ordine:
-	- pozitia observatorului
-	- punctul catre care priveste observatorul
-	- directia dupa care este orientat observatorul
-	*/
-	viewMatrix = glm::lookAt(view_pos, glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
-}
 
 //functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
@@ -90,23 +68,14 @@ void compile_shader(GLuint& shader)
 	}
 }
 
-void init()
+void create_shader_program(char *vertex_shader_file, char *fragment_shader_path, GLuint &shader_programme)
 {
-	// get version info
-	const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
-	const GLubyte* version = glGetString(GL_VERSION); // version as a string
-	printf("Renderer: %s\n", renderer);
-	printf("OpenGL version supported %s\n", version);
-	//glDepthFunc(GL_ALWAYS);
-	//glEnable(GL_DEPTH_TEST);
-	glewInit();
-
-	std::string vstext = textFileRead((char *)"shader/light_vertex.shader");
-	std::string fstext = textFileRead((char *)"shader/light_fragment.shader");
+	std::string vstext = textFileRead(vertex_shader_file);
+	std::string fstext = textFileRead(fragment_shader_path);
 	const char* vertex_shader = vstext.c_str();
 	const char* fragment_shader = fstext.c_str();
 
-	
+
 	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vs, 1, &vertex_shader, NULL);
 	compile_shader(vs);
@@ -119,6 +88,46 @@ void init()
 	glAttachShader(shader_programme, fs);
 	glAttachShader(shader_programme, vs);
 	glLinkProgram(shader_programme);
+}
+
+void init()
+{
+	// get version info
+	const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
+	const GLubyte* version = glGetString(GL_VERSION); // version as a string
+	printf("Renderer: %s\n", renderer);
+	printf("OpenGL version supported %s\n", version);
+	//glDepthFunc(GL_ALWAYS);
+	//glEnable(GL_DEPTH_TEST);
+	glewInit();
+
+	//load texture
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* data = stbi_load("textures/board.jpg", &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+			GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	//----------------END LOAD TEXTURE---------------
+
+	create_shader_program((char*)"shader/light_vertex.shader", (char*)"shader/light_fragment.shader", lighting_shader_programme);
+	create_shader_program((char*)"shader/btext_vertex.shader", (char*)"shader/btext_fragment.shader", texture_shader_programme);
+	
 	
 	create_menu();
 	uimanager::WIN = WIN;
@@ -418,20 +427,20 @@ void draw_possible_moves() {
 void update_uniform_fragment_shader()
 {
 	modelMatrix = glm::mat4();
-	GLuint lightPosLoc = glGetUniformLocation(shader_programme, "lightPos");
+	GLuint lightPosLoc = glGetUniformLocation(lighting_shader_programme, "lightPos");
 	glUniform3fv(lightPosLoc, 1, glm::value_ptr(light_pos));
 
-	GLuint viewPosLoc = glGetUniformLocation(shader_programme, "viewPos");
+	GLuint viewPosLoc = glGetUniformLocation(lighting_shader_programme, "viewPos");
 	glUniform3fv(viewPosLoc, 1, glm::value_ptr(view_pos));
 
 	//modelMatrix *= glm::rotate(rotAngle, glm::vec3(0, 1, 0));
-	GLuint modelMatrixLoc = glGetUniformLocation(shader_programme, "mvpMatrix");
+	GLuint modelMatrixLoc = glGetUniformLocation(lighting_shader_programme, "mvpMatrix");
 	auto mvp = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 
 	// se determina matricea ce realizeaza corectia normalelor. Ea se trimite catre vertex shader la fel cum s-a procedat si cu mvpMatrix 
 	glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
-	GLuint normalMatrixLoc = glGetUniformLocation(shader_programme, "normalMatrix");
+	GLuint normalMatrixLoc = glGetUniformLocation(lighting_shader_programme, "normalMatrix");
 	glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 }
 
@@ -442,7 +451,7 @@ void display() {
 	glUseProgram(0);
 	int s;
 	float x, y;
-	
+
 	GLuint vbo = 1;
 	glGenBuffers(1, &vbo);
 	GLuint checkers_vbo = 3;
@@ -451,35 +460,51 @@ void display() {
 	glGenBuffers(1, &crown_vbo);
 	GLuint color_vbo = 2;
 	glGenBuffers(1, &color_vbo);
-	
+
 	vao = 0;
 	glGenVertexArrays(1, &vao);
+	GLuint color_id;
+	glm::vec3 color;
+
+
+	if (enable_texture)
+	{
+		glUseProgram(lighting_shader_programme);
+		glEnableVertexAttribArray(0);
+
+	}
+	else
+	{
+		for (auto i = 0; i < ROWS; i++) {
+			for (auto j = 0; j < COLUMNS; j++) {
+				//one square drawing
+				glUseProgram(lighting_shader_programme);
+				glEnableVertexAttribArray(0);
+
+				auto* const current_square = board_squares[i][j];
+
+				glBindBuffer(GL_ARRAY_BUFFER, vbo);
+				glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), current_square, GL_STATIC_DRAW);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+				GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
+				glUniform1i(lightingEn_id, enable_lighting);
+
+				color_id = glGetUniformLocation(lighting_shader_programme, "color");
+				glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
+
+				update_uniform_fragment_shader();
+
+				glDrawArrays(GL_QUADS, 0, 4);
+
+				glDisableVertexAttribArray(0);
+				glUseProgram(0);
+			}
+		}
+	}
 	
 	for (auto i = 0; i < ROWS; i++) {
 		for (auto j = 0; j < COLUMNS; j++) {
-			glm::vec3 color;
-			
-			//one square drawing
-			glUseProgram(shader_programme);
-			glEnableVertexAttribArray(0);
-			
-			auto* const current_square = board_squares[i][j];
-			
-			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), current_square, GL_STATIC_DRAW);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-			GLuint lightingEn_id = glGetUniformLocation(shader_programme, "enableLighting");
-			glUniform1i(lightingEn_id, enable_lighting);
-			
-			GLuint color_id = glGetUniformLocation(shader_programme, "color");
-			glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
-
-			update_uniform_fragment_shader();
-			
-			glDrawArrays(GL_QUADS, 0, 4);
-			glDisableVertexAttribArray(0);
-			glUseProgram(0);
 			
 			//transformation time, become queen if needed
 			if (i == 0 && board[i][j].check == TYPE2)//'B')
@@ -544,7 +569,7 @@ void display() {
 				checker_position /= 275;
 			}
 			
-			glUseProgram(shader_programme);
+			glUseProgram(lighting_shader_programme);
 			glEnableVertexAttribArray(0);
 			
 			glUniform3fv(color_id, 1, glm::value_ptr(color));
@@ -581,7 +606,7 @@ void display() {
 				else if (board[i][j].check == BLACK_CHECKER)
 					color = glm::vec3(0.9, 0.1, 0.1);
 				
-				glUseProgram(shader_programme);
+				glUseProgram(lighting_shader_programme);
 				glEnableVertexAttribArray(0);
 
 				glUniform3fv(color_id, 1, glm::value_ptr(color));

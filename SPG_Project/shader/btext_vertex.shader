@@ -13,12 +13,11 @@ uniform mat4 normalMatrix;
 
 void main()
 {
-	gl_Position = vec4(vPos, 1.0);
 	ourColor = aColor;
 	TexCoord = aTexCoord;
 
 	gl_Position = mvpMatrix * vec4(vPos, 1.0);
-	normal = vec3(normalMatrix * vec4(0, 0, 1.0, 1.0));
+	normal = vec3(mvpMatrix * vec4(0, 0, 1.0, 0.0));
 
 	pos = vPos;
 }

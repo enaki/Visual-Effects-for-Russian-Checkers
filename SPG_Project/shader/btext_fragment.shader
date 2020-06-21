@@ -13,7 +13,7 @@ uniform bool enableLighting;
 uniform sampler2D textureColor;
 uniform sampler2D textureNormal;
 
-uniform mat4 modelMatrix;
+uniform mat4 mvpMatrix;
 uniform int enableNormal;
 
 vec3 lighting(vec3 pos, vec3 normal, vec3 lightPos, vec3 viewPos, vec3 ambient, vec3 lightColor, vec3 specular, float specPower)
@@ -40,18 +40,16 @@ void main()
 {
 	vec3 ambient = vec3(0.2);
 	//vec3 diffuse = vec3(1.0, 0, 0);
-	vec3 diffuse = vec3(0.5, 0.5, 0.5);
+	vec3 diffuse = ourColor;
 	vec3 specular = vec3(0.8);
 	float specPower = 32;
-	vec4 temp_color = vec4(ourColor, 1.0) * texture(textureColor, TexCoord);
-
 
 	vec3 normal_to_use = normal;
 	if (enableNormal == 1) {
 		vec3 normalFromMap = texture(textureNormal, TexCoord).rgb;
 		normalFromMap.g = 1 - normalFromMap.g;
 		normalFromMap = normalFromMap * 2 - 1;
-		normalFromMap = normalize(vec3(modelMatrix * vec4(normalize(normalFromMap), 0.0)));
+		normalFromMap = normalize(vec3(mvpMatrix * vec4(normalize(normalFromMap), 0.0)));
 		normal_to_use = normalFromMap;
 	}
 

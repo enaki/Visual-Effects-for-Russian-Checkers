@@ -453,8 +453,8 @@ void init()
 	create_shader_program((char*)"shader/light_vertex.shader", (char*)"shader/light_fragment.shader", lighting_shader_programme);
 	create_shader_program((char*)"shader/btext_vertex.shader", (char*)"shader/btext_fragment.shader", texture_shader_programme);
 
-	setTexture((char*)"textures/board_normal.jpg", texture_shader_programme, board_texture);
-	setTexture((char*)"textures/board.jpg", texture_shader_programme, board_texture_normal);
+	setTexture((char*)"textures/board.jpg", texture_shader_programme, board_texture);
+	setTexture((char*)"textures/board_normal.jpg", texture_shader_programme, board_texture_normal);
 	
 	create_menu();
 	uimanager::WIN = WIN;
@@ -513,8 +513,16 @@ void display() {
 		GLuint texture2ID = glGetUniformLocation(texture_shader_programme, "textureNormal");
 		glUniform1i(texture2ID, 1);
 
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, board_texture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, board_texture_normal);
+		
+		GLuint enableNormal_1 = glGetUniformLocation(texture_shader_programme, "enableNormal");
+		glUniform1i(enableNormal_1, enableNormal);
 		GLuint lightingEn_id = glGetUniformLocation(texture_shader_programme, "enableLighting");
 		glUniform1i(lightingEn_id, enable_lighting);
+		
 		update_uniform_fragment_shader(texture_shader_programme);
 		
 		glDrawArrays(GL_QUADS, 0, 4);

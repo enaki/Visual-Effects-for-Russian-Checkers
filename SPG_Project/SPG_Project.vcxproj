@@ -133,10 +133,12 @@
     <ClCompile Include="src\grafix.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\bsq_fragment.vert" />
-    <None Include="shader\bsq_vertex.vert" />
-    <None Include="shader\light_fragment.vert" />
-    <None Include="shader\light_vertex.vert" />
+    <None Include="shader\bsq_fragment.shader" />
+    <None Include="shader\bsq_vertex.shader" />
+    <None Include="shader\btext_fragment.shader" />
+    <None Include="shader\btext_vertex.shader" />
+    <None Include="shader\light_fragment.shader" />
+    <None Include="shader\light_vertex.shader" />
     <None Include="src\fragment.frag" />
     <None Include="src\joc.check" />
     <None Include="src\vertex.vert" />
@@ -148,7 +150,11 @@
     <ClInclude Include="src\grafix.hpp" />
     <ClInclude Include="src\UIManager\keyboard.h" />
     <ClInclude Include="src\UIManager\mouse.h" />
-    <ClInclude Include="src\utilities.h" />
+    <ClInclude Include="src\Utils\stb_image.h" />
+    <ClInclude Include="src\Utils\utilities.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\board.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

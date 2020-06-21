@@ -21,6 +21,8 @@
 
 GLuint lighting_shader_programme, texture_shader_programme, vao;
 GLuint vbo = 1;
+GLuint board_texture;
+
 float board_squares[ROWS][COLUMNS][12];
 float full_board[32] = {
 	// positions							// colors			// texture coords
@@ -406,11 +408,10 @@ void update_uniform_fragment_shader()
 	glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 }
 
-void setTexture(char *filename, GLuint &shaderProgramme) {
+void setTexture(char *filename, GLuint &shaderProgramme, GLuint &texture) {
 	glUseProgram(shaderProgramme);
 
 	//load texture
-	GLuint texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	int width, height, nrChannels;
@@ -418,8 +419,7 @@ void setTexture(char *filename, GLuint &shaderProgramme) {
 	unsigned char* data = stbi_load(filename, &width, &height, &nrChannels, 0);
 	if (data)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-			GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
@@ -448,7 +448,7 @@ void init()
 	create_shader_program((char*)"shader/light_vertex.shader", (char*)"shader/light_fragment.shader", lighting_shader_programme);
 	create_shader_program((char*)"shader/btext_vertex.shader", (char*)"shader/btext_fragment.shader", texture_shader_programme);
 
-	setTexture((char*)"textures/board.jpg", texture_shader_programme);
+	setTexture((char*)"textures/board.jpg", texture_shader_programme, board_texture);
 	
 	create_menu();
 	uimanager::WIN = WIN;
@@ -470,19 +470,21 @@ void display() {
 
 	GLuint vbo = 1;
 	glGenBuffers(1, &vbo);
+	GLuint color_vbo = 2;
+	glGenBuffers(1, &color_vbo);
 	GLuint checkers_vbo = 3;
 	glGenBuffers(1, &checkers_vbo);
 	GLuint crown_vbo = 3;
 	glGenBuffers(1, &crown_vbo);
 	GLuint board_texture_vbo = 4;
 	glGenBuffers(1, &board_texture_vbo);
-	GLuint color_vbo = 2;
-	glGenBuffers(1, &color_vbo);
-
+	
 	vao = 0;
 	glGenVertexArrays(1, &vao);
 	GLuint color_id;
 	glm::vec3 color;
+
+	color_id = glGetUniformLocation(lighting_shader_programme, "color");
 
 	if (enable_texture)
 	{
@@ -500,6 +502,9 @@ void display() {
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 		glEnableVertexAttribArray(2);
 
+		GLuint texture1ID = glGetUniformLocation(texture_shader_programme, "ourTexture");
+		glUniform1i(texture1ID, 0);
+		
 		glDrawArrays(GL_QUADS, 0, 4);
 		
 		glDisableVertexAttribArray(0);
@@ -527,6 +532,8 @@ void display() {
 
 				update_uniform_fragment_shader();
 
+				glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
+				
 				glDrawArrays(GL_QUADS, 0, 4);
 
 				glDisableVertexAttribArray(0);
@@ -535,8 +542,7 @@ void display() {
 		}
 	}
 
-	color_id = glGetUniformLocation(lighting_shader_programme, "color");
-	glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
+	
 	
 	for (auto i = 0; i < ROWS; i++) {
 		for (auto j = 0; j < COLUMNS; j++) {

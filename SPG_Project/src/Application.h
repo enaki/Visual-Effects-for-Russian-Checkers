@@ -11,5 +11,7 @@ void put_checker();
 void undo();
 void init();
 
+void update_uniform_fragment_shader();
+
 void draw_possible_moves();
 

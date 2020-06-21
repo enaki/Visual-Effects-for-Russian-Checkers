@@ -135,6 +135,8 @@
   <ItemGroup>
     <None Include="shader\bsq_fragment.vert" />
     <None Include="shader\bsq_vertex.vert" />
+    <None Include="shader\light_fragment.vert" />
+    <None Include="shader\light_vertex.vert" />
     <None Include="src\fragment.frag" />
     <None Include="src\joc.check" />
     <None Include="src\vertex.vert" />

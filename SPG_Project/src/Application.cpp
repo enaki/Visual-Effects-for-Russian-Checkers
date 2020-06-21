@@ -23,10 +23,31 @@ GLuint vbo = 1;
 float board_squares[ROWS][COLUMNS][12];
 
 
+#define PI glm::pi<float>()
+
+float LIGHT = 0.5f;
+float rotAngle = 0;
+float rotAngleInc = M_PI / 64;
+
+
+void reshape(int w, int h)
+{
+	glViewport(0, 0, w, h);
+	projectionMatrix = glm::perspective(PI / 6, (float)w / h, 0.1f, 100.0f);
+	/*
+	viewMatrix este matricea transformarii de observare. Parametrii functiei
+	lookAt sunt trei vectori ce reprezinta, in ordine:
+	- pozitia observatorului
+	- punctul catre care priveste observatorul
+	- directia dupa care este orientat observatorul
+	*/
+	viewMatrix = glm::lookAt(view_pos, glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
+}
+
 //functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(550, 550);
 	glutInitWindowPosition(100, 100);
 	WIN = glutCreateWindow("Russian Checkers");
@@ -40,7 +61,7 @@ int main(int argc, char** argv) {
 	glutMainLoop();
 }
 
-void compile_shader(GLuint &shader)
+void compile_shader(GLuint& shader)
 {
 	GLint isCompiled = 0;
 
@@ -73,11 +94,12 @@ void init()
 	const GLubyte* version = glGetString(GL_VERSION); // version as a string
 	printf("Renderer: %s\n", renderer);
 	printf("OpenGL version supported %s\n", version);
-
+	//glDepthFunc(GL_ALWAYS);
+	//glEnable(GL_DEPTH_TEST);
 	glewInit();
 
-	std::string vstext = textFileRead((char *)"shader/bsq_vertex.vert");
-	std::string fstext = textFileRead((char *)"shader/bsq_fragment.vert");
+	std::string vstext = textFileRead((char *)"shader/light_vertex.vert");
+	std::string fstext = textFileRead((char *)"shader/light_fragment.vert");
 	const char* vertex_shader = vstext.c_str();
 	const char* fragment_shader = fstext.c_str();
 
@@ -98,8 +120,8 @@ void init()
 	create_menu();
 	uimanager::WIN = WIN;
 	glClearColor(0.9, 0.9, 0.9, 0.9);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
 	glOrtho(-275.0, 275.0, -275.0, 275.0, 0.0, 1.0);
 	board_init();
 }
@@ -390,6 +412,26 @@ void draw_possible_moves() {
 }
 
 
+void update_uniform_fragment_shader()
+{
+	modelMatrix = glm::mat4();
+	GLuint lightPosLoc = glGetUniformLocation(shader_programme, "lightPos");
+	glUniform3fv(lightPosLoc, 1, glm::value_ptr(light_pos));
+
+	GLuint viewPosLoc = glGetUniformLocation(shader_programme, "viewPos");
+	glUniform3fv(viewPosLoc, 1, glm::value_ptr(view_pos));
+
+	//modelMatrix *= glm::rotate(rotAngle, glm::vec3(0, 1, 0));
+	GLuint modelMatrixLoc = glGetUniformLocation(shader_programme, "mvpMatrix");
+	auto mvp = projectionMatrix * viewMatrix * modelMatrix;
+	glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+
+	// se determina matricea ce realizeaza corectia normalelor. Ea se trimite catre vertex shader la fel cum s-a procedat si cu mvpMatrix 
+	glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+	GLuint normalMatrixLoc = glGetUniformLocation(shader_programme, "normalMatrix");
+	glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+}
+
 //functia de desenare grafica principala
 void display() {
 	//curatam ecranul
@@ -424,10 +466,14 @@ void display() {
 			glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), current_square, GL_STATIC_DRAW);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-			GLuint color_id = glGetUniformLocation(shader_programme, "color");
-			glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(1, 0, 1)));
+			GLuint lightingEn_id = glGetUniformLocation(shader_programme, "enableLighting");
+			glUniform1i(lightingEn_id, enable_lighting);
 			
+			GLuint color_id = glGetUniformLocation(shader_programme, "color");
+			glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
 
+			update_uniform_fragment_shader();
+			
 			glDrawArrays(GL_QUADS, 0, 4);
 			glDisableVertexAttribArray(0);
 			glUseProgram(0);

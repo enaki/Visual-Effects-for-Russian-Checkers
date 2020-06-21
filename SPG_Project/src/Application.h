@@ -12,6 +12,7 @@ void undo();
 void init();
 void create_shader_program(char* vertex_shader_file, char* fragment_shader_path, GLuint& shader_programme);
 void update_uniform_fragment_shader();
-
+void compile_shader(GLuint& shader);
+void init_data();
 void draw_possible_moves();
 

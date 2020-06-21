@@ -26,10 +26,10 @@ GLuint board_texture;
 float board_squares[ROWS][COLUMNS][12];
 float full_board[32] = {
 	// positions							// colors			// texture coords
-	-240.0f,	-240.0f,	0.0f,		1.0f, 0.0f, 0.0f,	0.0f, 0.0f,
-	 240.0f,	-240.0f,	0.0f,		0.0f, 1.0f, 0.0f,	1.0f, 0.0f,
-	 240.0f,	 240.0f,	0.0f,		0.0f, 0.0f, 1.0f,	1.0f, 1.0f,
-	-240.0f,	 240.0f,	0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 1.0f
+	-240.0f,	-240.0f,	0.0f,		1.0f, 0.0f, 0.0f,	0.0f, 1.0f,
+	 240.0f,	-240.0f,	0.0f,		0.0f, 1.0f, 0.0f,	1.0f, 1.0f,
+	 240.0f,	 240.0f,	0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 1.0f,
+	-240.0f,	 240.0f,	0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 0.0f
 };
 
 //functia main in care initializam rutina OpenGL si Glut
@@ -39,6 +39,7 @@ int main(int argc, char** argv) {
 	glutInitWindowSize(550, 550);
 	glutInitWindowPosition(100, 100);
 	WIN = glutCreateWindow("Russian Checkers");
+	init_data();
 	init();
 	glutPassiveMotionFunc(passive_motion);
 	glutDisplayFunc(display);
@@ -47,6 +48,15 @@ int main(int argc, char** argv) {
 	glutKeyboardFunc(uimanager::keyboard_listener);
 	timer(0);
 	glutMainLoop();
+}
+
+void init_data()
+{
+	for (auto i = 0; i < 4; i++)
+	{
+		full_board[8 * i] /= 275;
+		full_board[8 * i + 1] /= 275;
+	}
 }
 
 void compile_shader(GLuint& shader)
@@ -239,11 +249,6 @@ void board_init() {
 				board_squares[i][j][k] /= 275;
 			}
 		}
-	}
-	for (auto i = 0; i < 4; i++)
-	{
-		full_board[8 * i] /= 275;
-		full_board[8 * i + 1] /= 275;
 	}
 }
 

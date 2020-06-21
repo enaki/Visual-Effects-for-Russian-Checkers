@@ -393,23 +393,23 @@ void draw_possible_moves() {
 }
 
 
-void update_uniform_fragment_shader()
+void update_uniform_fragment_shader(GLuint &shader_programme)
 {
 	modelMatrix = glm::mat4();
-	GLuint lightPosLoc = glGetUniformLocation(lighting_shader_programme, "lightPos");
+	GLuint lightPosLoc = glGetUniformLocation(shader_programme, "lightPos");
 	glUniform3fv(lightPosLoc, 1, glm::value_ptr(light_pos));
 
-	GLuint viewPosLoc = glGetUniformLocation(lighting_shader_programme, "viewPos");
+	GLuint viewPosLoc = glGetUniformLocation(shader_programme, "viewPos");
 	glUniform3fv(viewPosLoc, 1, glm::value_ptr(view_pos));
 
 	//modelMatrix *= glm::rotate(rotAngle, glm::vec3(0, 1, 0));
-	GLuint modelMatrixLoc = glGetUniformLocation(lighting_shader_programme, "mvpMatrix");
+	GLuint modelMatrixLoc = glGetUniformLocation(shader_programme, "mvpMatrix");
 	auto mvp = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 
 	// se determina matricea ce realizeaza corectia normalelor. Ea se trimite catre vertex shader la fel cum s-a procedat si cu mvpMatrix 
 	glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
-	GLuint normalMatrixLoc = glGetUniformLocation(lighting_shader_programme, "normalMatrix");
+	GLuint normalMatrixLoc = glGetUniformLocation(shader_programme, "normalMatrix");
 	glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 }
 
@@ -509,6 +509,10 @@ void display() {
 
 		GLuint texture1ID = glGetUniformLocation(texture_shader_programme, "ourTexture");
 		glUniform1i(texture1ID, 0);
+
+		GLuint lightingEn_id = glGetUniformLocation(texture_shader_programme, "enableLighting");
+		glUniform1i(lightingEn_id, enable_lighting);
+		update_uniform_fragment_shader(texture_shader_programme);
 		
 		glDrawArrays(GL_QUADS, 0, 4);
 		
@@ -535,7 +539,7 @@ void display() {
 				GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
 				glUniform1i(lightingEn_id, enable_lighting);
 
-				update_uniform_fragment_shader();
+				update_uniform_fragment_shader(lighting_shader_programme);
 
 				glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
 				
@@ -626,7 +630,7 @@ void display() {
 			GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
 			glUniform1i(lightingEn_id, enable_lighting);
 
-			update_uniform_fragment_shader();
+			update_uniform_fragment_shader(lighting_shader_programme);
 			
 			glDrawArrays(GL_POLYGON, 0, circle_precision);
 			

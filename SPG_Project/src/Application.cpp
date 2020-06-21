@@ -3,6 +3,9 @@
 
 #include <cstdlib>
 #include "Application.h"
+
+#include <iostream>
+
 #include "utilities.h"
 #include "grafix.hpp"
 #include <queue>
@@ -58,6 +61,32 @@ int main(int argc, char** argv) {
 	glutMainLoop();
 }
 
+void compile_shader(GLuint& shader)
+{
+	GLint isCompiled = 0;
+
+	glCompileShader(shader);
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+
+	if (isCompiled == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		// The maxLength includes the NULL character
+		std::vector<GLchar> infoLog(maxLength);
+		glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+
+		// We don't need the shader anymore.
+		glDeleteShader(shader);
+		glDeleteShader(shader);
+		std::string strInfoLog(infoLog.begin(), infoLog.end());
+		std::cout << strInfoLog << std::endl;
+		// In this simple program, we'll just leave
+		throw new std::exception(strInfoLog.c_str());
+	}
+}
+
 void init()
 {
 	// get version info
@@ -76,10 +105,10 @@ void init()
 
 	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vs, 1, &vertex_shader, NULL);
-	glCompileShader(vs);
+	compile_shader(vs);
 	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fs, 1, &fragment_shader, NULL);
-	glCompileShader(fs);
+	compile_shader(fs);
 
 	shader_programme = glCreateProgram();
 	glAttachShader(shader_programme, fs);
@@ -435,8 +464,11 @@ void display() {
 			glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), current_square, GL_STATIC_DRAW);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
+			GLuint lightingEn_id = glGetUniformLocation(shader_programme, "enableLighting");
+			glUniform1i(lightingEn_id, enable_lighting);
+			
 			GLuint color_id = glGetUniformLocation(shader_programme, "color");
-			glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(1, 0, 1)));
+			glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
 
 			update_uniform_fragment_shader();
 			

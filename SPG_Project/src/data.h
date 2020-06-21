@@ -30,7 +30,6 @@ bool JUMPED = false;
 bool POS_MOVES = false;
 bool HELP = false;
 
-
 std::list<std::pair<int, int>> jump_list;
 std::list<std::pair<int, int>> check_list;
 std::list<std::pair<int, int>> move_list;
@@ -54,4 +53,6 @@ glm::mat4 projectionMatrix, viewMatrix, modelMatrix;
 //glm::vec3 view_pos(0, 0, 1);
 
 glm::vec3 light_pos(0, 1, 5);
-glm::vec3 view_pos(2, 3, 6);
+glm::vec3 view_pos(0, 0, 1);
+
+GLint enable_lighting = 1;

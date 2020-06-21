@@ -103,9 +103,11 @@ void init()
 	const char* vertex_shader = vstext.c_str();
 	const char* fragment_shader = fstext.c_str();
 
+	
 	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vs, 1, &vertex_shader, NULL);
 	compile_shader(vs);
+
 	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fs, 1, &fragment_shader, NULL);
 	compile_shader(fs);

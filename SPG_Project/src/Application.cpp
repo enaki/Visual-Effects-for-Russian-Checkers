@@ -17,13 +17,18 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "Utils/stb_image.h"
+#define PI glm::pi<float>()
 
 GLuint lighting_shader_programme, texture_shader_programme, vao;
 GLuint vbo = 1;
 float board_squares[ROWS][COLUMNS][12];
-
-
-#define PI glm::pi<float>()
+float full_board[32] = {
+	// positions							// colors			// texture coords
+	-240.0f,	-240.0f,	0.0f,		1.0f, 0.0f, 0.0f,	0.0f, 0.0f,
+	 240.0f,	-240.0f,	0.0f,		0.0f, 1.0f, 0.0f,	1.0f, 0.0f,
+	 240.0f,	 240.0f,	0.0f,		0.0f, 0.0f, 1.0f,	1.0f, 1.0f,
+	-240.0f,	 240.0f,	0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 1.0f
+};
 
 //functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
@@ -88,54 +93,6 @@ void create_shader_program(char *vertex_shader_file, char *fragment_shader_path,
 	glAttachShader(shader_programme, fs);
 	glAttachShader(shader_programme, vs);
 	glLinkProgram(shader_programme);
-}
-
-void init()
-{
-	// get version info
-	const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
-	const GLubyte* version = glGetString(GL_VERSION); // version as a string
-	printf("Renderer: %s\n", renderer);
-	printf("OpenGL version supported %s\n", version);
-	//glDepthFunc(GL_ALWAYS);
-	//glEnable(GL_DEPTH_TEST);
-	glewInit();
-
-	//load texture
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	int width, height, nrChannels;
-	stbi_set_flip_vertically_on_load(true);
-	unsigned char* data = stbi_load("textures/board.jpg", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-			GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//----------------END LOAD TEXTURE---------------
-
-	create_shader_program((char*)"shader/light_vertex.shader", (char*)"shader/light_fragment.shader", lighting_shader_programme);
-	create_shader_program((char*)"shader/btext_vertex.shader", (char*)"shader/btext_fragment.shader", texture_shader_programme);
-	
-	
-	create_menu();
-	uimanager::WIN = WIN;
-	glClearColor(0.9, 0.9, 0.9, 0.9);
-	//glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
-	glOrtho(-275.0, 275.0, -275.0, 275.0, 0.0, 1.0);
-	board_init();
 }
 
 //recursive call during the program
@@ -280,6 +237,11 @@ void board_init() {
 				board_squares[i][j][k] /= 275;
 			}
 		}
+	}
+	for (auto i = 0; i < 4; i++)
+	{
+		full_board[8 * i] /= 275;
+		full_board[8 * i + 1] /= 275;
 	}
 }
 
@@ -444,6 +406,60 @@ void update_uniform_fragment_shader()
 	glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 }
 
+void setTexture(char *filename, GLuint &shaderProgramme) {
+	glUseProgram(shaderProgramme);
+
+	//load texture
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	int width, height, nrChannels;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* data = stbi_load(filename, &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+			GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	stbi_image_free(data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+
+void init()
+{
+	// get version info
+	const GLubyte* renderer = glGetString(GL_RENDERER); // get renderer string
+	const GLubyte* version = glGetString(GL_VERSION); // version as a string
+	printf("Renderer: %s\n", renderer);
+	printf("OpenGL version supported %s\n", version);
+	//glDepthFunc(GL_ALWAYS);
+	//glEnable(GL_DEPTH_TEST);
+	glewInit();
+
+
+	create_shader_program((char*)"shader/light_vertex.shader", (char*)"shader/light_fragment.shader", lighting_shader_programme);
+	create_shader_program((char*)"shader/btext_vertex.shader", (char*)"shader/btext_fragment.shader", texture_shader_programme);
+
+	setTexture((char*)"textures/board.jpg", texture_shader_programme);
+	
+	create_menu();
+	uimanager::WIN = WIN;
+	glClearColor(0.9, 0.9, 0.9, 0.9);
+	//glMatrixMode(GL_PROJECTION);
+	//glLoadIdentity();
+	glOrtho(-275.0, 275.0, -275.0, 275.0, 0.0, 1.0);
+	board_init();
+}
+
+
 //functia de desenare grafica principala
 void display() {
 	//curatam ecranul
@@ -458,6 +474,8 @@ void display() {
 	glGenBuffers(1, &checkers_vbo);
 	GLuint crown_vbo = 3;
 	glGenBuffers(1, &crown_vbo);
+	GLuint board_texture_vbo = 4;
+	glGenBuffers(1, &board_texture_vbo);
 	GLuint color_vbo = 2;
 	glGenBuffers(1, &color_vbo);
 
@@ -466,12 +484,29 @@ void display() {
 	GLuint color_id;
 	glm::vec3 color;
 
-
 	if (enable_texture)
 	{
-		glUseProgram(lighting_shader_programme);
+		glUseProgram(texture_shader_programme);
+		glEnableVertexAttribArray(0);
+		
+		glBindBuffer(GL_ARRAY_BUFFER, board_texture_vbo);
+		glBufferData(GL_ARRAY_BUFFER, 32 * sizeof(float), full_board, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), NULL);
 		glEnableVertexAttribArray(0);
 
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+
+		glDrawArrays(GL_QUADS, 0, 4);
+		
+		glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+		glUseProgram(0);
+		//enable_texture = 0;
 	}
 	else
 	{
@@ -490,9 +525,6 @@ void display() {
 				GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
 				glUniform1i(lightingEn_id, enable_lighting);
 
-				color_id = glGetUniformLocation(lighting_shader_programme, "color");
-				glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
-
 				update_uniform_fragment_shader();
 
 				glDrawArrays(GL_QUADS, 0, 4);
@@ -502,6 +534,9 @@ void display() {
 			}
 		}
 	}
+
+	color_id = glGetUniformLocation(lighting_shader_programme, "color");
+	glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
 	
 	for (auto i = 0; i < ROWS; i++) {
 		for (auto j = 0; j < COLUMNS; j++) {
@@ -576,6 +611,12 @@ void display() {
 			glBindBuffer(GL_ARRAY_BUFFER, checkers_vbo);
 			glBufferData(GL_ARRAY_BUFFER, 3 * circle_precision * sizeof(float), checker_positions, GL_STATIC_DRAW);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+			GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
+			glUniform1i(lightingEn_id, enable_lighting);
+
+			update_uniform_fragment_shader();
+			
 			glDrawArrays(GL_POLYGON, 0, circle_precision);
 			
 			glDisableVertexAttribArray(0);

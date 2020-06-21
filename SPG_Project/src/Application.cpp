@@ -3,6 +3,9 @@
 
 #include <cstdlib>
 #include "Application.h"
+
+#include <iostream>
+
 #include "utilities.h"
 #include "grafix.hpp"
 #include <queue>
@@ -37,6 +40,32 @@ int main(int argc, char** argv) {
 	glutMainLoop();
 }
 
+void compile_shader(GLuint &shader)
+{
+	GLint isCompiled = 0;
+
+	glCompileShader(shader);
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+
+	if (isCompiled == GL_FALSE)
+	{
+		GLint maxLength = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+		// The maxLength includes the NULL character
+		std::vector<GLchar> infoLog(maxLength);
+		glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+
+		// We don't need the shader anymore.
+		glDeleteShader(shader);
+		glDeleteShader(shader);
+		std::string strInfoLog(infoLog.begin(), infoLog.end());
+		std::cout << strInfoLog << std::endl;
+		// In this simple program, we'll just leave
+		throw new std::exception(strInfoLog.c_str());
+	}
+}
+
 void init()
 {
 	// get version info
@@ -52,12 +81,14 @@ void init()
 	const char* vertex_shader = vstext.c_str();
 	const char* fragment_shader = fstext.c_str();
 
+	
 	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vs, 1, &vertex_shader, NULL);
-	glCompileShader(vs);
+	compile_shader(vs);
+
 	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fs, 1, &fragment_shader, NULL);
-	glCompileShader(fs);
+	compile_shader(fs);
 
 	shader_programme = glCreateProgram();
 	glAttachShader(shader_programme, fs);

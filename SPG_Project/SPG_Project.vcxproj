@@ -155,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\board.jpg" />
+    <Image Include="textures\board_normal.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

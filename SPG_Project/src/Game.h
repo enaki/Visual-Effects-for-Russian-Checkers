@@ -30,7 +30,7 @@
 ************+----+----+----+----+----+----+----+----+
 
  */
-#include "utilities.h"
+#include "Utils/utilities.h"
 
 
 int count_checkers(int);

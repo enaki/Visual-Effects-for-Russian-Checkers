@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#include "utilities.h"
+#include "Utils/utilities.h"
 #include "grafix.hpp"
 #include <queue>
 #include <list>
@@ -17,6 +17,9 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "Utils/stb_image.h"
 
 GLuint shader_programme, vao;
 GLuint vbo = 1;
@@ -98,8 +101,8 @@ void init()
 	//glEnable(GL_DEPTH_TEST);
 	glewInit();
 
-	std::string vstext = textFileRead((char *)"shader/light_vertex.vert");
-	std::string fstext = textFileRead((char *)"shader/light_fragment.vert");
+	std::string vstext = textFileRead((char *)"shader/light_vertex.shader");
+	std::string fstext = textFileRead((char *)"shader/light_fragment.shader");
 	const char* vertex_shader = vstext.c_str();
 	const char* fragment_shader = fstext.c_str();
 

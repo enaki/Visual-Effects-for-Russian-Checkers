@@ -26,19 +26,18 @@
     <None Include="src\fragment.frag" />
     <None Include="src\vertex.vert" />
     <None Include="src\joc.check" />
-    <None Include="shader\bsq_fragment.vert" />
-    <None Include="shader\bsq_vertex.vert" />
-    <None Include="shader\light_fragment.vert" />
-    <None Include="shader\light_vertex.vert" />
+    <None Include="shader\light_vertex.shader" />
+    <None Include="shader\light_fragment.shader" />
+    <None Include="shader\bsq_vertex.shader" />
+    <None Include="shader\bsq_fragment.shader" />
+    <None Include="shader\btext_fragment.shader" />
+    <None Include="shader\btext_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\grafix.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\data.h">
@@ -51,6 +50,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\UIManager\keyboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

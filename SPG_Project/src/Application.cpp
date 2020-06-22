@@ -18,18 +18,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "Utils/stb_image.h"
 
-GLuint lighting_shader_programme, texture_shader_programme, vao;
-GLuint vbo = 1;
-GLuint board_texture, board_texture_normal;
 
-float board_squares[ROWS][COLUMNS][12];
-float full_board[32] = {
-	// positions							// colors			// texture coords
-	-240.0f,	-240.0f,	0.0f,		1.0f, 0.0f, 0.0f,	0.0f, 1.0f,
-	 240.0f,	-240.0f,	0.0f,		0.0f, 1.0f, 0.0f,	1.0f, 1.0f,
-	 240.0f,	 240.0f,	0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 1.0f,
-	-240.0f,	 240.0f,	0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 0.0f
-};
 
 //functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
@@ -267,10 +256,14 @@ void create_menu() {
 	int options = glutCreateMenu(action_menu);
 
 	//submeniul "Optiuni"
+	glutAddMenuEntry("Texture On/Off", 9);
+	glutAddMenuEntry("Light On/Off", 10);
+	glutAddMenuEntry("Normal On/Off", 11);
+	glutAddMenuEntry("Undo", 6);
 	glutAddMenuEntry("Rotire 180", 3);
 	glutAddMenuEntry("Rotiri on/off", 4);
 	glutAddMenuEntry("Miscari Posibile on/off", 7);
-	glutAddMenuEntry("Undo", 6);
+	
 
 	int menuId = glutCreateMenu(action_menu);
 
@@ -327,6 +320,15 @@ void action_menu(int option) {
 		break;
 	case 8:
 		HELP = true;
+		break;
+	case 9:
+		enable_texture = !enable_texture;
+		break;
+	case 10:
+		enable_lighting = !enable_lighting;
+		break;
+	case 11:
+		enable_normal = !enable_normal;
 		break;
 	default: break;
 	}
@@ -598,7 +600,7 @@ void draw_board_with_texture(GLuint &board_texture_vbo)
 	glBindTexture(GL_TEXTURE_2D, board_texture_normal);
 		
 	GLuint enableNormal_1 = glGetUniformLocation(texture_shader_programme, "enableNormal");
-	glUniform1i(enableNormal_1, enableNormal);
+	glUniform1i(enableNormal_1, enable_normal);
 	GLuint lightingEn_id = glGetUniformLocation(texture_shader_programme, "enableLighting");
 	glUniform1i(lightingEn_id, enable_lighting);
 		
@@ -673,24 +675,17 @@ void display() {
 	GLuint circle_vbo = 5;
 	glGenBuffers(1, &circle_vbo);
 	
-	vao = 0;
-	glGenVertexArrays(1, &vao);
 	GLuint color_id;
 	glm::vec3 color;
 
 	color_id = glGetUniformLocation(lighting_shader_programme, "color");
 
 	if (enable_texture)
-	{
 		draw_board_with_texture(board_texture_vbo);
-	}
 	else
-	{
-		//one square drawing
 		for (auto i = 0; i < ROWS; i++)
 			for (auto j = 0; j < COLUMNS; j++)
 				draw_board_square(i, j, board_square_color, vbo);
-	}
 	
 	//draw checkers pieces
 	for (auto i = 0; i < ROWS; i++)
@@ -733,7 +728,6 @@ void display() {
 				}
 
 				else if (!move_list.empty())
-				{
 					if (list_contain_element(move_list, i, j))
 					{
 						if (uimanager::PRESSED)
@@ -749,7 +743,6 @@ void display() {
 							color = type2_selected_color;
 
 					}
-				}
 			}
 
 			//desenam piesele de joc (octagoane)
@@ -769,25 +762,21 @@ void display() {
 		}
 	}
 
-	//desenam cifrele din stinga tablei, literele de jos
-	//si doua linii de contur
+	//desenam cifrele din stinga tablei, literele de jos si doua linii de contur
 	draw_around(uimanager::SIDE_COEF);
 
 	//Desenam toate miscarile posibile daca exista
-	if (POS_MOVES)
-		draw_possible_moves();
+	if (POS_MOVES) draw_possible_moves();
 
 	//desenam output-ul meniului "Ajutor"
 	if (HELP)
 	{
 		show_help(uimanager::SIDE_COEF);
 		if (uimanager::PRESSED)
-		{
 			if (uimanager::MOUSEX * uimanager::SIDE_COEF > 190 && uimanager::MOUSEY * uimanager::SIDE_COEF > 140 && uimanager::MOUSEX * uimanager::SIDE_COEF < 210 && uimanager::MOUSEY * uimanager::SIDE_COEF < 160)
 			{
 				HELP = false;
 			}
-		}
 	}
 	else
 	{
@@ -820,4 +809,4 @@ void display() {
 		}
 	}
 	glFlush();
-	}
+}

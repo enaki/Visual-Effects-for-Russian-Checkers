@@ -60,4 +60,17 @@ glm::vec3 board_square_color(0.5, 0.0, 0.0);	//dark red
 
 GLint enable_lighting = 1;
 GLint enable_texture = 1;
-GLint enableNormal = 1;
+GLint enable_normal = 1;
+
+GLuint lighting_shader_programme, texture_shader_programme;
+GLuint vbo = 1;
+GLuint board_texture, board_texture_normal;
+
+float board_squares[ROWS][COLUMNS][12];
+float full_board[32] = {
+	// positions							// colors			// texture coords
+	-240.0f,	-240.0f,	0.0f,		1.0f, 0.0f, 0.0f,	0.0f, 1.0f,
+	 240.0f,	-240.0f,	0.0f,		0.0f, 1.0f, 0.0f,	1.0f, 1.0f,
+	 240.0f,	 240.0f,	0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 1.0f,
+	-240.0f,	 240.0f,	0.0f,		0.0f, 0.0f, 1.0f,	0.0f, 0.0f
+};

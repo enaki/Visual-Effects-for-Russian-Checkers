@@ -475,6 +475,29 @@ void draw_checkers_piece(float board_x, float board_y, const int num_segments, c
 }
 
 
+void draw_board_square(int i, int j, const glm::vec3 color, GLuint& vbo)
+{
+	glUseProgram(lighting_shader_programme);
+	glEnableVertexAttribArray(0);
+
+	GLuint color_id = glGetUniformLocation(lighting_shader_programme, "color");
+	glUniform3fv(color_id, 1, glm::value_ptr(color));
+
+	GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
+	glUniform1i(lightingEn_id, enable_lighting);
+
+	update_uniform_fragment_shader(lighting_shader_programme);
+
+	auto* const current_square = board_squares[i][j];
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), current_square, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	glDrawArrays(GL_QUADS, 0, 4);
+	glDisableVertexAttribArray(0);
+	glUseProgram(0);
+}
 
 void update_uniform_fragment_shader(GLuint &shader_programme)
 {
@@ -617,29 +640,10 @@ void display() {
 	}
 	else
 	{
+		//one square drawing
 		for (auto i = 0; i < ROWS; i++) {
 			for (auto j = 0; j < COLUMNS; j++) {
-				//one square drawing
-				glUseProgram(lighting_shader_programme);
-				glEnableVertexAttribArray(0);
-
-				auto* const current_square = board_squares[i][j];
-
-				glBindBuffer(GL_ARRAY_BUFFER, vbo);
-				glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), current_square, GL_STATIC_DRAW);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-				GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
-				glUniform1i(lightingEn_id, enable_lighting);
-
-				update_uniform_fragment_shader(lighting_shader_programme);
-
-				glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(0.5, 0.0, 0.0)));
-				
-				glDrawArrays(GL_QUADS, 0, 4);
-
-				glDisableVertexAttribArray(0);
-				glUseProgram(0);
+				draw_board_square(i, j, board_square_color, vbo);
 			}
 		}
 	}
@@ -648,22 +652,22 @@ void display() {
 	//draw checkers pieces
 	for (auto i = 0; i < ROWS; i++) {
 		for (auto j = 0; j < COLUMNS; j++) {
-			
+
 			//transformation time, become queen if needed
 			if (i == 0 && board[i][j].check == TYPE2)//'B')
 				board[i][j].type = KING;
 
 			if (i == 7 && board[i][j].check == TYPE1)//'W')
 				board[i][j].type = KING;
-			
+
 			//color the checkers according to type
 			if (board[i][j].check == WHITE_CHECKER)
-				color = type1_color; 
+				color = type1_color;
 			else if (board[i][j].check == BLACK_CHECKER)
 				color = type2_color;
 			else
 				continue;
-			
+
 			//selectarea unei piese
 			if (board[i][j].check == GO && uimanager::MOUSEX < board[i][j].x + 30 && uimanager::MOUSEX > board[i][j].x - 30 && uimanager::MOUSEY < board[i][j].y + 30 && uimanager::MOUSEY > board[i][j].y - 30) {
 				if (!jump_list.empty()) {
@@ -692,7 +696,7 @@ void display() {
 							color = type1_selected_color;
 						else if (board[i][j].check == BLACK_CHECKER)
 							color = type2_selected_color;
-						
+
 					}
 				}
 			}
@@ -702,10 +706,12 @@ void display() {
 			const auto circle_precision = 16;
 
 			draw_checkers_piece(board[i][j].x, board[i][j].y, 16, color, checkers_vbo, true);
-			draw_circle(board[i][j].x, board[i][j].y, 30 - 10, 50, get_alternate_color(color), color_vbo, true);
-
-			//desenam coronita la dame
-			if (board[i][j].type == KING) {
+			draw_circle(board[i][j].x, board[i][j].y, 30 - 10, 30, get_alternate_color(color), color_vbo, true);
+			if (board[i][j].type != KING){
+				draw_circle(board[i][j].x, board[i][j].y, 30 - 17, 30, get_alternate_color(color), color_vbo, true);
+				draw_circle(board[i][j].x, board[i][j].y, 30 - 24, 30, get_alternate_color(color), color_vbo, true);
+			} else {
+				//desenam coronita la dame
 				const auto mx = board[i][j].x;
 				const auto my = board[i][j].y;
 

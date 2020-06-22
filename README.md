@@ -13,3 +13,26 @@ Changes:
 - Included Normal Mapping
 - Improved Checkers piece design
 - Changed Board Theme and appereance
+
+Samples
+
+Home
+![alt text](https://github.com/enaky/SPG-Project/blob/master/Samples/1.PNG)
+
+Help Menu
+![alt text](https://github.com/enaky/SPG-Project/blob/master/Samples/2.PNG)
+
+Normal Mode
+![alt text](https://github.com/enaky/SPG-Project/blob/master/Samples/3.PNG)
+
+Lighting On
+![alt text](https://github.com/enaky/SPG-Project/blob/master/Samples/4.PNG)
+
+Lighting and Texture On
+![alt text](https://github.com/enaky/SPG-Project/blob/master/Samples/5.PNG)
+
+Lighting, Texture and Normal Mapping On
+![alt text](https://github.com/enaky/SPG-Project/blob/master/Samples/6.PNG)
+
+Lighting, Texture and Normal Mapping On 2
+![alt text](https://github.com/enaky/SPG-Project/blob/master/Samples/7.PNG)

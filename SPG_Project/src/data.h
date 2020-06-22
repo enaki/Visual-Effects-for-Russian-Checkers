@@ -50,9 +50,9 @@ square board[ROWS][COLUMNS], undo_board[ROWS][COLUMNS];
 
 std::pair<int, int> sel, to;
 
-glm::mat4 projectionMatrix, viewMatrix, modelMatrix;
+glm::mat4 projection_matrix, view_matrix, model_matrix;
 
-glm::vec3 light_pos(0, 1, 5);
+glm::vec3 light_pos(0, 0, 5);
 glm::vec3 view_pos(0, 0, 1);
 
 glm::vec3 type1_color(1, 1, 1);	//white
@@ -69,7 +69,6 @@ GLint enable_normal = 0;
 GLint light_type = 1;
 
 GLuint lighting_shader_programme, texture_shader_programme;
-GLuint vbo = 1;
 GLuint board_texture, board_texture_normal;
 
 float board_squares[ROWS][COLUMNS][12];

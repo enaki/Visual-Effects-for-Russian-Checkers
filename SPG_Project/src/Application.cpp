@@ -17,6 +17,14 @@
 
 #include "Application.h"
 
+GLuint vbo = 1;
+GLuint color_vbo = 2;
+GLuint checkers_vbo = 3;
+GLuint crown_vbo = 3;
+GLuint board_texture_vbo = 4;
+GLuint circle_vbo = 5;
+
+
 
 //functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
@@ -47,19 +55,19 @@ void init_data()
 
 void compile_shader(GLuint& shader)
 {
-	GLint isCompiled = 0;
+	GLint is_compiled = 0;
 
 	glCompileShader(shader);
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &is_compiled);
 
-	if (isCompiled == GL_FALSE)
+	if (is_compiled == GL_FALSE)
 	{
-		GLint maxLength = 0;
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+		GLint max_length = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length);
 
 		// The maxLength includes the NULL character
-		std::vector<GLchar> infoLog(maxLength);
-		glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
+		std::vector<GLchar> infoLog(max_length);
+		glGetShaderInfoLog(shader, max_length, &max_length, &infoLog[0]);
 
 		// We don't need the shader anymore.
 		glDeleteShader(shader);
@@ -262,9 +270,9 @@ void create_menu() {
 	glutAddMenuEntry("Rotation 180", 3);
 	glutAddMenuEntry("Rotations on/off", 4);
 	glutAddMenuEntry("Possible Moves on/off", 7);
-	
 
-	int menuId = glutCreateMenu(action_menu);
+
+	glutCreateMenu(action_menu);
 
 	glutAddMenuEntry("New Game", 1);
 	glutAddMenuEntry("Continue", 2);
@@ -520,7 +528,7 @@ void draw_board_square(int i, int j, const glm::vec3 color, GLuint& vbo)
 
 void update_uniform_fragment_shader(GLuint &shader_programme)
 {
-	modelMatrix = glm::mat4();
+	model_matrix = glm::mat4();
 	GLuint lightPosLoc = glGetUniformLocation(shader_programme, "lightPos");
 	glUniform3fv(lightPosLoc, 1, glm::value_ptr(light_pos));
 
@@ -529,11 +537,11 @@ void update_uniform_fragment_shader(GLuint &shader_programme)
 
 	//modelMatrix *= glm::rotate(rotAngle, glm::vec3(0, 1, 0));
 	GLuint modelMatrixLoc = glGetUniformLocation(shader_programme, "mvpMatrix");
-	auto mvp = projectionMatrix * viewMatrix * modelMatrix;
+	auto mvp = projection_matrix * view_matrix * model_matrix;
 	glUniformMatrix4fv(modelMatrixLoc, 1, GL_FALSE, glm::value_ptr(mvp));
 
 	// se determina matricea ce realizeaza corectia normalelor. Ea se trimite catre vertex shader la fel cum s-a procedat si cu mvpMatrix 
-	glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelMatrix));
+	glm::mat4 normalMatrix = glm::transpose(glm::inverse(model_matrix));
 	GLuint normalMatrixLoc = glGetUniformLocation(shader_programme, "normalMatrix");
 	glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 }
@@ -575,6 +583,13 @@ void init()
 	glEnable(GL_DEPTH_TEST);
 	glewInit();
 
+	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &color_vbo);
+	glGenBuffers(1, &checkers_vbo);
+	glGenBuffers(1, &crown_vbo);
+	glGenBuffers(1, &board_texture_vbo);
+	glGenBuffers(1, &circle_vbo);
+	
 	create_shader_program((char*)"shader/light_vertex.shader", (char*)"shader/light_fragment.shader", lighting_shader_programme);
 	create_shader_program((char*)"shader/btext_vertex.shader", (char*)"shader/btext_fragment.shader", texture_shader_programme);
 
@@ -685,21 +700,7 @@ void display() {
 	glUseProgram(0);
 	draw_background();
 	
-	GLuint vbo = 1;
-	glGenBuffers(1, &vbo);
-	GLuint color_vbo = 2;
-	glGenBuffers(1, &color_vbo);
-	GLuint checkers_vbo = 3;
-	glGenBuffers(1, &checkers_vbo);
-	GLuint crown_vbo = 3;
-	glGenBuffers(1, &crown_vbo);
-	GLuint board_texture_vbo = 4;
-	glGenBuffers(1, &board_texture_vbo);
-	GLuint circle_vbo = 5;
-	glGenBuffers(1, &circle_vbo);
-	
 	glm::vec3 color;
-
 
 	if (enable_texture)
 		draw_board_with_texture(board_texture_vbo);

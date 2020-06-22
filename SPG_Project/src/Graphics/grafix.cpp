@@ -95,21 +95,53 @@ void show_help(int c) {
 	std::string str1 = "Russian Checkers";
 	std::string str2 = "Fore more info:";
 	std::string str3 = "https://en.wikipedia.org/wiki/Russian_draughts";
+	std::string str4 = "Controls";
+	std::string str[12] = {
+		"w: Light Up",
+		"s: Light Down",
+		"a: Light Left",
+		"d: Light Right",
+		"q: Light Up-Left",
+		"e: Light Up-Right",
+		"z: Light Down-Left",
+		"x: Light Down-Right",
+		"l: Light On/Off",
+		"t: Texture On/Off",
+		"n: Normals On/Off",
+		"o: Change Light Type"
+	};
 
 	glColor3f(1, 0, 0);
 	//string
-	glRasterPos2f(-100.0f * c, 50.0f * c);
+	glRasterPos2f(-100.0f * c, 110.0f * c);
 	for (auto i : str1)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, i);
 	//string2
 	glColor3f(menu_text_color1.x, menu_text_color1.y, menu_text_color1.z);
-	glRasterPos2f(-80.0f * c, 10.0f * c);
+	glRasterPos2f(-80.0f * c, 75.0f * c);
 	for (auto i : str2)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, i);
 	//string3
-	glRasterPos2f(-180.0f * c, -30.0f * c);
+	glRasterPos2f(-190.0f * c, 50.0f * c);
 	for (auto i : str3)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, i);
+	//string4
+	glColor3f(1, 1, 0);
+	glRasterPos2f(-60.0f * c, 00.0f * c);
+	for (auto i : str4)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, i);
+
+	//controls
+	glColor3f(1, 0, 1);
+	for (int i = 0; i < 6; i++)
+	{
+		glRasterPos2f(-180.0f * c, (-20.0f - i * 20) * c);
+		for (auto letter : str[i])
+			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, letter);
+		glRasterPos2f(10.0f * c, (-20.0f - i * 20) * c);
+		for (auto letter : str[i+6])
+			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, letter);
+	}
 }
 
 //deseneaza cifrele si literele in jurul tablei

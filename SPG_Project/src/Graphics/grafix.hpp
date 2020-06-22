@@ -7,4 +7,5 @@ void show_winner(const char*, int);
 void show_help(int);
 void draw_around(int);
 void show_turn(const char*, int, int, int);
-
+void draw_background();
+void draw_light_position(float x, float y, int c);

@@ -18,7 +18,7 @@
     <ClCompile Include="src\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\grafix.cpp">
+    <ClCompile Include="src\Graphics\grafix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -34,12 +34,6 @@
     <None Include="shader\btext_vertex.shader" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\grafix.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -56,6 +50,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Utils\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Graphics\grafix.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Game\Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

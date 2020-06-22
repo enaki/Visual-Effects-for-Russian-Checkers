@@ -43,7 +43,7 @@ void main()
 	vec3 diffuse = ourColor;
 	vec3 specular = vec3(0.8);
 	float specPower = 32;
-
+	vec3 color;
 	vec3 normal_to_use = normal;
 	if (enableNormal == 1) {
 		vec3 normalFromMap = texture(textureNormal, TexCoord).rgb;
@@ -55,7 +55,8 @@ void main()
 
 	vec3 colorFromTexture = texture2D(textureColor, TexCoord).rgb;
 
-	vec3 color = lighting(pos, normal_to_use, lightPos, viewPos, ambient, diffuse, specular, specPower) * colorFromTexture;
+	color = lighting(pos, normal_to_use, lightPos, viewPos, ambient, diffuse, specular, specPower) * colorFromTexture;
+	
 	if (enableLighting) {
 		fragColor = vec4(color, 1.0);
 	}

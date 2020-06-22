@@ -59,5 +59,5 @@ glm::vec3 type2_selected_color(0.2, 0.2, 0.8);	//blue pale
 glm::vec3 board_square_color(0.5, 0.0, 0.0);	//dark red
 
 GLint enable_lighting = 1;
-GLint enable_texture = 0;
+GLint enable_texture = 1;
 GLint enableNormal = 1;

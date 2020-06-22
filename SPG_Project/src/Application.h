@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include <glm/detail/type_vec3.hpp>
 
-//prototipurile functiilor
 void board_init();
 void display();
 void timer(int);
@@ -17,4 +16,7 @@ void compile_shader(GLuint& shader);
 void init_data();
 void draw_possible_moves();
 void draw_circle(float, float, float, const int, const glm::vec3, GLuint& , bool);
-
+void draw_board_with_texture(GLuint&);
+void draw_board_square(int, int, const glm::vec3, GLuint&);
+void draw_checkers_piece(float, float, const int, const glm::vec3, GLuint&, bool);
+void draw_crown(GLuint, int, int);

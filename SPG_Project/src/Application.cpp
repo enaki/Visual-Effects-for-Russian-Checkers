@@ -571,6 +571,89 @@ void init()
 }
 
 
+void draw_board_with_texture(GLuint &board_texture_vbo)
+{
+	glUseProgram(texture_shader_programme);
+	glEnableVertexAttribArray(0);
+		
+	glBindBuffer(GL_ARRAY_BUFFER, board_texture_vbo);
+	glBufferData(GL_ARRAY_BUFFER, 32 * sizeof(float), full_board, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), NULL);
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	GLuint texture1ID = glGetUniformLocation(texture_shader_programme, "textureColor");
+	glUniform1i(texture1ID, 0);
+	GLuint texture2ID = glGetUniformLocation(texture_shader_programme, "textureNormal");
+	glUniform1i(texture2ID, 1);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, board_texture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, board_texture_normal);
+		
+	GLuint enableNormal_1 = glGetUniformLocation(texture_shader_programme, "enableNormal");
+	glUniform1i(enableNormal_1, enableNormal);
+	GLuint lightingEn_id = glGetUniformLocation(texture_shader_programme, "enableLighting");
+	glUniform1i(lightingEn_id, enable_lighting);
+		
+	update_uniform_fragment_shader(texture_shader_programme);
+		
+	glDrawArrays(GL_QUADS, 0, 4);
+		
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+	glUseProgram(0);
+}
+
+void draw_crown(GLuint crown_vbo, int i, int j)
+{
+	glm::vec3 color;
+	
+	GLuint color_id = glGetUniformLocation(lighting_shader_programme, "color");
+	//desenam coronita la dame
+	const auto mx = board[i][j].x;
+	const auto my = board[i][j].y;
+
+	float crown[3 * 8] = {
+		mx,			my - 10 * uimanager::SIDE_COEF,	 0.0f,
+		mx + 10,	my - 10 * uimanager::SIDE_COEF,	 0.0f,
+		mx + 10,	my + 10 * uimanager::SIDE_COEF,	 0.0f,
+		mx + 5,		my - 5 * uimanager::SIDE_COEF,	 0.0f,
+		mx,			my + 10 * uimanager::SIDE_COEF,	 0.0f,
+		mx - 5,		my - 5 * uimanager::SIDE_COEF,	 0.0f,
+		mx - 10,	my + 10 * uimanager::SIDE_COEF,	 0.0f,
+		mx - 10,	my - 10 * uimanager::SIDE_COEF,	 0.0f
+	};
+	for (auto& crown_angle : crown)
+	{
+		crown_angle /= 275;
+	}
+
+	if (board[i][j].check == WHITE_CHECKER)
+		color = glm::vec3(0.0, 0.0, 1.0);
+	else if (board[i][j].check == BLACK_CHECKER)
+		color = get_alternate_color_2(type2_color);
+				
+	glUseProgram(lighting_shader_programme);
+	glEnableVertexAttribArray(0);
+
+	glUniform3fv(color_id, 1, glm::value_ptr(color));
+	glBindBuffer(GL_ARRAY_BUFFER, crown_vbo);
+	glBufferData(GL_ARRAY_BUFFER, 3 * 8 * sizeof(float), crown, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glDrawArrays(GL_POLYGON, 0, 8);
+
+	glDisableVertexAttribArray(0);
+	glUseProgram(0);
+}
+
 //functia de desenare grafica principala
 void display() {
 	//curatam ecranul
@@ -599,60 +682,21 @@ void display() {
 
 	if (enable_texture)
 	{
-		glUseProgram(texture_shader_programme);
-		glEnableVertexAttribArray(0);
-		
-		glBindBuffer(GL_ARRAY_BUFFER, board_texture_vbo);
-		glBufferData(GL_ARRAY_BUFFER, 32 * sizeof(float), full_board, GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), NULL);
-		glEnableVertexAttribArray(0);
-
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-		glEnableVertexAttribArray(2);
-
-		GLuint texture1ID = glGetUniformLocation(texture_shader_programme, "textureColor");
-		glUniform1i(texture1ID, 0);
-		GLuint texture2ID = glGetUniformLocation(texture_shader_programme, "textureNormal");
-		glUniform1i(texture2ID, 1);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, board_texture);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, board_texture_normal);
-		
-		GLuint enableNormal_1 = glGetUniformLocation(texture_shader_programme, "enableNormal");
-		glUniform1i(enableNormal_1, enableNormal);
-		GLuint lightingEn_id = glGetUniformLocation(texture_shader_programme, "enableLighting");
-		glUniform1i(lightingEn_id, enable_lighting);
-		
-		update_uniform_fragment_shader(texture_shader_programme);
-		
-		glDrawArrays(GL_QUADS, 0, 4);
-		
-		glDisableVertexAttribArray(0);
-		glDisableVertexAttribArray(1);
-		glDisableVertexAttribArray(2);
-		glUseProgram(0);
-		//enable_texture = 0;
+		draw_board_with_texture(board_texture_vbo);
 	}
 	else
 	{
 		//one square drawing
-		for (auto i = 0; i < ROWS; i++) {
-			for (auto j = 0; j < COLUMNS; j++) {
+		for (auto i = 0; i < ROWS; i++)
+			for (auto j = 0; j < COLUMNS; j++)
 				draw_board_square(i, j, board_square_color, vbo);
-			}
-		}
 	}
-
 	
 	//draw checkers pieces
-	for (auto i = 0; i < ROWS; i++) {
-		for (auto j = 0; j < COLUMNS; j++) {
-
+	for (auto i = 0; i < ROWS; i++)
+	{
+		for (auto j = 0; j < COLUMNS; j++)
+		{
 			//transformation time, become queen if needed
 			if (i == 0 && board[i][j].check == TYPE2)//'B')
 				board[i][j].type = KING;
@@ -669,10 +713,14 @@ void display() {
 				continue;
 
 			//selectarea unei piese
-			if (board[i][j].check == GO && uimanager::MOUSEX < board[i][j].x + 30 && uimanager::MOUSEX > board[i][j].x - 30 && uimanager::MOUSEY < board[i][j].y + 30 && uimanager::MOUSEY > board[i][j].y - 30) {
-				if (!jump_list.empty()) {
-					if (list_contain_element(jump_list, i, j) && board[i][j].check == GO) {
-						if (uimanager::PRESSED) {
+			if (board[i][j].check == GO && uimanager::MOUSEX < board[i][j].x + 30 && uimanager::MOUSEX > board[i][j].x - 30 && uimanager::MOUSEY < board[i][j].y + 30 && uimanager::MOUSEY > board[i][j].y - 30)
+			{
+				if (!jump_list.empty())
+				{
+					if (list_contain_element(jump_list, i, j) && board[i][j].check == GO)
+					{
+						if (uimanager::PRESSED)
+						{
 							sel.first = i;
 							sel.second = j;
 						}
@@ -684,9 +732,12 @@ void display() {
 					}
 				}
 
-				else if (!move_list.empty()) {
-					if (list_contain_element(move_list, i, j)) {
-						if (uimanager::PRESSED) {
+				else if (!move_list.empty())
+				{
+					if (list_contain_element(move_list, i, j))
+					{
+						if (uimanager::PRESSED)
+						{
 							sel.first = i;
 							sel.second = j;
 						}
@@ -707,45 +758,13 @@ void display() {
 
 			draw_checkers_piece(board[i][j].x, board[i][j].y, 16, color, checkers_vbo, true);
 			draw_circle(board[i][j].x, board[i][j].y, 30 - 10, 30, get_alternate_color(color), color_vbo, true);
-			if (board[i][j].type != KING){
+			if (board[i][j].type != KING)
+			{
 				draw_circle(board[i][j].x, board[i][j].y, 30 - 17, 30, get_alternate_color(color), color_vbo, true);
 				draw_circle(board[i][j].x, board[i][j].y, 30 - 24, 30, get_alternate_color(color), color_vbo, true);
-			} else {
-				//desenam coronita la dame
-				const auto mx = board[i][j].x;
-				const auto my = board[i][j].y;
-
-				float crown[3 * 8] = {
-					mx,			my - 10 * uimanager::SIDE_COEF,	 0.0f,
-					mx + 10,	my - 10 * uimanager::SIDE_COEF,	 0.0f,
-					mx + 10,	my + 10 * uimanager::SIDE_COEF,	 0.0f,
-					mx + 5,		my - 5 * uimanager::SIDE_COEF,	 0.0f,
-					mx,			my + 10 * uimanager::SIDE_COEF,	 0.0f,
-					mx - 5,		my - 5 * uimanager::SIDE_COEF,	 0.0f,
-					mx - 10,	my + 10 * uimanager::SIDE_COEF,	 0.0f,
-					mx - 10,	my - 10 * uimanager::SIDE_COEF,	 0.0f
-				};
-				for (auto& crown_angle : crown)
-				{
-					crown_angle /= 275;
-				}
-
-				if (board[i][j].check == WHITE_CHECKER)
-					color = glm::vec3(0.0, 0.0, 1.0);
-				else if (board[i][j].check == BLACK_CHECKER)
-					color = glm::vec3(0.9, 0.1, 0.1);
-				
-				glUseProgram(lighting_shader_programme);
-				glEnableVertexAttribArray(0);
-
-				glUniform3fv(color_id, 1, glm::value_ptr(color));
-				glBindBuffer(GL_ARRAY_BUFFER, crown_vbo);
-				glBufferData(GL_ARRAY_BUFFER, 3 * 8 * sizeof(float), crown, GL_STATIC_DRAW);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-				glDrawArrays(GL_POLYGON, 0, 8);
-
-				glDisableVertexAttribArray(0);
-				glUseProgram(0);
+			} else
+			{
+				draw_crown(crown_vbo, i, j);
 			}
 		}
 	}
@@ -759,15 +778,19 @@ void display() {
 		draw_possible_moves();
 
 	//desenam output-ul meniului "Ajutor"
-	if (HELP) {
+	if (HELP)
+	{
 		show_help(uimanager::SIDE_COEF);
-		if (uimanager::PRESSED) {
-			if (uimanager::MOUSEX * uimanager::SIDE_COEF > 190 && uimanager::MOUSEY * uimanager::SIDE_COEF > 140 && uimanager::MOUSEX * uimanager::SIDE_COEF < 210 && uimanager::MOUSEY * uimanager::SIDE_COEF < 160) {
+		if (uimanager::PRESSED)
+		{
+			if (uimanager::MOUSEX * uimanager::SIDE_COEF > 190 && uimanager::MOUSEY * uimanager::SIDE_COEF > 140 && uimanager::MOUSEX * uimanager::SIDE_COEF < 210 && uimanager::MOUSEY * uimanager::SIDE_COEF < 160)
+			{
 				HELP = false;
 			}
 		}
 	}
-	else {
+	else
+	{
 		if (!check_list.empty()) check_list.clear();
 		if (!jump_list.empty()) jump_list.clear();
 		if (!move_list.empty()) move_list.clear();
@@ -777,13 +800,16 @@ void display() {
 
 		if (TYPE1 == TYPE2)
 			show_intro(uimanager::SIDE_COEF);
-		else {
+		else
+		{
 			//afisam invingatorul sau detinatorul de miscare in timpul dat
-			if (count_checkers(WHITE_CHECKER) == 0 || no_more_moves(WHITE_CHECKER)) {
+			if (count_checkers(WHITE_CHECKER) == 0 || no_more_moves(WHITE_CHECKER))
+			{
 				show_winner("Negrele au invins!", uimanager::SIDE_COEF);
 				show_turn("Negrele au invins!", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			}
-			else if (count_checkers(BLACK_CHECKER) == 0 || no_more_moves(BLACK_CHECKER)) {
+			else if (count_checkers(BLACK_CHECKER) == 0 || no_more_moves(BLACK_CHECKER))
+			{
 				show_winner("Albele au invins!", uimanager::SIDE_COEF);
 				show_turn("Albele au invins!", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			}
@@ -794,4 +820,4 @@ void display() {
 		}
 	}
 	glFlush();
-}
+	}

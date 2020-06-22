@@ -15,7 +15,6 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
 #include "Application.h"
 
 
@@ -258,6 +257,7 @@ void create_menu() {
 	glutAddMenuEntry("Texture On/Off", 9);
 	glutAddMenuEntry("Light On/Off", 10);
 	glutAddMenuEntry("Normal On/Off", 11);
+	glutAddMenuEntry("Change Light Type", 12);
 	glutAddMenuEntry("Undo", 6);
 	glutAddMenuEntry("Rotire 180", 3);
 	glutAddMenuEntry("Rotiri on/off", 4);
@@ -328,6 +328,9 @@ void action_menu(int option) {
 		break;
 	case 11:
 		enable_normal = !enable_normal;
+		break;
+	case 12:
+		light_type = !light_type;
 		break;
 	default: break;
 	}
@@ -403,6 +406,9 @@ void draw_circle(float cx, float cy, float radius, const int num_segments, const
 	GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
 	glUniform1i(lightingEn_id, enable_lighting);
 
+	GLuint lighting_type = glGetUniformLocation(lighting_shader_programme, "lightingType");
+	glUniform1i(lighting_type, light_type);
+	
 	update_uniform_fragment_shader(lighting_shader_programme);
 	
 	if (scalation)
@@ -447,6 +453,9 @@ void draw_checkers_piece(float board_x, float board_y, const int num_segments, c
 	GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
 	glUniform1i(lightingEn_id, enable_lighting);
 
+	GLuint lighting_type = glGetUniformLocation(lighting_shader_programme, "lightingType");
+	glUniform1i(lighting_type, light_type);
+	
 	update_uniform_fragment_shader(lighting_shader_programme);
 
 	float *checker_positions = new float[3 * num_segments];
@@ -475,7 +484,6 @@ void draw_checkers_piece(float board_x, float board_y, const int num_segments, c
 	delete[] checker_positions;
 }
 
-
 void draw_board_square(int i, int j, const glm::vec3 color, GLuint& vbo)
 {
 	glUseProgram(lighting_shader_programme);
@@ -487,6 +495,9 @@ void draw_board_square(int i, int j, const glm::vec3 color, GLuint& vbo)
 	GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
 	glUniform1i(lightingEn_id, enable_lighting);
 
+	GLuint lighting_type = glGetUniformLocation(lighting_shader_programme, "lightingType");
+	glUniform1i(lighting_type, light_type);
+	
 	update_uniform_fragment_shader(lighting_shader_programme);
 
 	auto* const current_square = board_squares[i][j];
@@ -520,8 +531,9 @@ void update_uniform_fragment_shader(GLuint &shader_programme)
 	glUniformMatrix4fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 }
 
-void setTexture(char *filename, GLuint &shaderProgramme, GLuint &texture) {
-	glUseProgram(shaderProgramme);
+auto set_texture(char* filename, GLuint& shader_programme, GLuint& texture) -> void
+{
+	glUseProgram(shader_programme);
 
 	//load texture
 	glGenTextures(1, &texture);
@@ -559,8 +571,8 @@ void init()
 	create_shader_program((char*)"shader/light_vertex.shader", (char*)"shader/light_fragment.shader", lighting_shader_programme);
 	create_shader_program((char*)"shader/btext_vertex.shader", (char*)"shader/btext_fragment.shader", texture_shader_programme);
 
-	setTexture((char*)"textures/board.jpg", texture_shader_programme, board_texture);
-	setTexture((char*)"textures/board_normal.jpg", texture_shader_programme, board_texture_normal);
+	set_texture((char*)"textures/board.jpg", texture_shader_programme, board_texture);
+	set_texture((char*)"textures/board_normal.jpg", texture_shader_programme, board_texture_normal);
 	
 	create_menu();
 	glClearColor(0.9f, 0.9f, 0.9f, 0.9f);
@@ -569,7 +581,6 @@ void init()
 	glOrtho(-275.0, 275.0, -275.0, 275.0, 0.0, 1.0);
 	board_init();
 }
-
 
 void draw_board_with_texture(GLuint &board_texture_vbo)
 {
@@ -597,10 +608,10 @@ void draw_board_with_texture(GLuint &board_texture_vbo)
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, board_texture_normal);
 		
-	GLuint enableNormal_1 = glGetUniformLocation(texture_shader_programme, "enableNormal");
-	glUniform1i(enableNormal_1, enable_normal);
-	GLuint lightingEn_id = glGetUniformLocation(texture_shader_programme, "enableLighting");
-	glUniform1i(lightingEn_id, enable_lighting);
+	GLuint enable_normal_1 = glGetUniformLocation(texture_shader_programme, "enableNormal");
+	glUniform1i(enable_normal_1, enable_normal);
+	GLuint lighting_en_id = glGetUniformLocation(texture_shader_programme, "enableLighting");
+	glUniform1i(lighting_en_id, enable_lighting);
 		
 	update_uniform_fragment_shader(texture_shader_programme);
 		
@@ -659,7 +670,8 @@ void display() {
 	//curatam ecranul
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(0);
-
+	draw_background();
+	
 	GLuint vbo = 1;
 	glGenBuffers(1, &vbo);
 	GLuint color_vbo = 2;
@@ -673,10 +685,8 @@ void display() {
 	GLuint circle_vbo = 5;
 	glGenBuffers(1, &circle_vbo);
 	
-	GLuint color_id;
 	glm::vec3 color;
 
-	color_id = glGetUniformLocation(lighting_shader_programme, "color");
 
 	if (enable_texture)
 		draw_board_with_texture(board_texture_vbo);
@@ -792,13 +802,13 @@ void display() {
 			//afisam invingatorul sau detinatorul de miscare in timpul dat
 			if (count_checkers(WHITE_CHECKER) == 0 || no_more_moves(WHITE_CHECKER))
 			{
-				show_winner("Negrele au invins!", SIDE_COEF);
-				show_turn("Negrele au invins!", SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				show_winner("Black wins!", SIDE_COEF);
+				show_turn("Black wins!", SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			}
 			else if (count_checkers(BLACK_CHECKER) == 0 || no_more_moves(BLACK_CHECKER))
 			{
-				show_winner("Albele au invins!", SIDE_COEF);
-				show_turn("Albele au invins!", SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				show_winner("White wins!", SIDE_COEF);
+				show_turn("White wins!", SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			}
 			else if (GO == WHITE_CHECKER)
 				show_turn("White's turn", SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));

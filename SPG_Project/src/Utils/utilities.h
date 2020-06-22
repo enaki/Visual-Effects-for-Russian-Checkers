@@ -4,8 +4,8 @@
 #include <fstream>
 #include <string>
 #include <time.h>
-#include "data.h"
-#include "UIManager/mouse.h"
+#include "../data.h"
+#include "../UIManager/mouse.h"
 
 template <typename T>
 void clear_queue(std::queue<T>& q)

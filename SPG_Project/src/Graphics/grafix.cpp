@@ -3,12 +3,21 @@
 #include "grafix.hpp"
 
 #include <string>
+#include <glm/detail/type_vec3.hpp>
+
+glm::vec3 menu_color(0.1f, 0.1f, 0.1f);
+glm::vec3 menu_color_2(0.3f, 0.3f, 0.3f);
+
+glm::vec3 menu_text_color1(1.0f, 1.0f, 1.0f);
+glm::vec3 menu_text_color2(0.4f, 0.2f, 0.2f);
+
+glm::vec3 winner_color(0.2f, 1.0f, 0.2f);
 
 //functia care arata la intrarea in joc numele autorului
 void show_intro(int c) {
 	//desenam un patrat suriu
 	glBegin(GL_QUADS);
-	glColor4f(0.7f, 0.7f, 0.7f, 0.5f);
+	glColor4f(menu_color.x, menu_color.y, menu_color.z, 0.5f);
 	glVertex2f(-100.0f * c, 80.0f * c);
 	glVertex2f(100.0f * c, 80.0f * c);
 	glVertex2f(100.0f * c, -80.0f * c);
@@ -18,24 +27,25 @@ void show_intro(int c) {
 
 	//scrim in patratul desenat mai sus
 	std::string str1 = "Russian Checkers";
-	glColor3f(0.6f,  0.6f, 0.6f);
+	glColor3f(menu_text_color2.x, menu_text_color2.y, menu_text_color2.z);
 	glRasterPos2f(-85.0f * c, 15.0f * c);
 	for (auto i : str1)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, i);
 
-	glColor3f(0.1f, 0.2f, 0.2f);
+	glColor3f(menu_text_color1.x, menu_text_color1.y, menu_text_color1.z);
 	glRasterPos2f(-90.0f * c, 20.0f * c);
 	for (auto i : str1)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, i);
 
 	std::string str2 = "Have fun!";
-	glColor3f(0.6f, 0.6f, 0.6f);
-	glRasterPos2f(-55.0f * c, -35.0f * c);
+	
+	glColor3f(menu_text_color2.x, menu_text_color2.y, menu_text_color2.z);
+	glRasterPos2f(-60.0f * c, -40.0f * c);
 	for (auto i : str2)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, i);
 
-	glColor3f(0.1f, 0.2f, 0.2f);
-	glRasterPos2f(-60.0f * c, -40.0f * c);
+	glColor3f(menu_text_color1.x, menu_text_color1.y, menu_text_color1.z);
+	glRasterPos2f(-55.0f * c, -35.0f * c);
 	for (auto i : str2)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, i);
 }
@@ -44,7 +54,7 @@ void show_intro(int c) {
 void show_winner(const char* string, int c) {
 	//desenam un dreptunghi suriu
 	glBegin(GL_QUADS);
-	glColor4f(0.7f, 0.7f, 0.7f, 0.5f);
+	glColor4f(menu_color.x, menu_color.y, menu_color.z, 0.5f);
 	glVertex2f(-110.0f * c, 50.0f * c);
 	glVertex2f(110.0f * c, 50.0f * c);
 	glVertex2f(110.0f * c, -50.0f * c);
@@ -52,13 +62,8 @@ void show_winner(const char* string, int c) {
 	glEnd();
 
 	//scrim cine a cistigat
-	glColor3f(0.5f, 0.5f, 0.5f);
+	glColor3f(winner_color.x, winner_color.y, winner_color.z);
 	glRasterPos2f(-90.0f * c, -5.0f * c);
-	for (size_t i = 0; i < strlen(string); i++)
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
-
-	glColor3f(0.0f, 0.0f, 0.8f);
-	glRasterPos2f(-95.0f * c, 0.0f);
 	for (size_t i = 0; i < strlen(string); i++)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
 }
@@ -67,14 +72,14 @@ void show_winner(const char* string, int c) {
 void show_help(int c) {
 	//desenam un dreptunghi suriu
 	glBegin(GL_QUADS);
-	glColor4f(0.7f, 0.7f, 0.7f, 0.5f);
+	glColor4f(menu_color.x, menu_color.y, menu_color.z, 0.5f);
 	glVertex2f(-200.0f * c, 150.0f * c);
 	glVertex2f(200.0f * c, 150.0f * c);
 	glVertex2f(200.0f * c, -150.0f * c);
 	glVertex2f(-200.0f * c, -150.0f * c);
 
 	//desenam un patrat mic cu x, pentru a iesi din meniu
-	glColor4f(0.7f, 0.7f, 0.7f, 0.5f);
+	glColor4f(menu_color_2.x, menu_color_2.y, menu_color_2.z, 0.5f);
 	glVertex2f(190.0f * c, 160.0f * c);
 	glVertex2f(210.0f * c, 160.0f * c);
 	glVertex2f(210.0f * c, 140.0f * c);
@@ -82,7 +87,7 @@ void show_help(int c) {
 	glEnd();
 
 	//desenam x-ul de iesire
-	glColor3f(0, 0, 0);
+	glColor3f(1, 0, 0);
 	glRasterPos2f(193.0f * c, 145.0f * c);
 	glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, 'x');
 
@@ -91,17 +96,18 @@ void show_help(int c) {
 	std::string str2 = "Fore more info:";
 	std::string str3 = "https://en.wikipedia.org/wiki/Russian_draughts";
 
-	glColor3f(0.3f, 0.4f, 0.3f);
+	glColor3f(1, 0, 0);
 	//string
-	glRasterPos2f(-180.0f * c, 110.0f * c);
+	glRasterPos2f(-100.0f * c, 50.0f * c);
 	for (auto i : str1)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, i);
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, i);
 	//string2
-	glRasterPos2f(-180.0f * c, 90.0f * c);
+	glColor3f(menu_text_color1.x, menu_text_color1.y, menu_text_color1.z);
+	glRasterPos2f(-80.0f * c, 10.0f * c);
 	for (auto i : str2)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, i);
 	//string3
-	glRasterPos2f(-180.0f * c, 50.0f * c);
+	glRasterPos2f(-180.0f * c, -30.0f * c);
 	for (auto i : str3)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, i);
 }
@@ -109,8 +115,17 @@ void show_help(int c) {
 //deseneaza cifrele si literele in jurul tablei
 //deasemenea doua linii de contur ale tablei
 void draw_around(int c) {
+	//desenam prima linie de contur
+	glBegin(GL_LINE_STRIP);
+	glVertex2f(-240.0f, -240.0f);
+	glVertex2f(-240.0f, 240.0f);
+	glVertex2f(240.0f, 240.0f);
+	glVertex2f(240.0f, -240.0f);
+	glVertex2f(-240.0f, -240.0f);
+	glEnd();
+
 	//selectam culoarea neagra
-	glColor3f(0, 0, 0);
+	glColor3f(1, 1, 1);
 	char l = '1';
 	char s = 'A';
 	//afisam cifrele si literele
@@ -142,10 +157,32 @@ void draw_around(int c) {
 	glEnd();
 }
 
+void draw_background()
+{
+	//background-ul
+	glBegin(GL_QUADS);
+	glColor3f(0, 0, 0);
+	glVertex2f(-275.0f, -275.0f);
+	glVertex2f(-275.0f, 275.0f);
+	glVertex2f(275.0f, 275.0f);
+	glVertex2f(275.0f, -275.0f);
+	glEnd();
+
+	//water-ul
+	glBegin(GL_QUADS);
+	glColor3f(0.7, 0.7, 0.7);
+	glVertex2f(-240.0f, -240.0f);
+	glVertex2f(-240.0f, 240.0f);
+	glVertex2f(240.0f, 240.0f);
+	glVertex2f(240.0f, -240.0f);
+	glEnd();
+}
+
+
 //afiseaza cine detine miscarea si numarul de piese
 void show_turn(const char* s, int c, int white, int black) {
-	//selectam culoarea neagra
-	glColor3f(0, 0, 0);
+	//selectam culoarea alba
+	glColor3f(menu_text_color1.x, menu_text_color1.y, menu_text_color1.z);
 	glRasterPos2f(-40.0f * c, 255.0f * c);
 	//afisam cine detine miscarea
 	for (size_t i = 0; i < strlen(s); i++)

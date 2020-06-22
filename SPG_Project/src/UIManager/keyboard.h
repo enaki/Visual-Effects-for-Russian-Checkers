@@ -1,6 +1,6 @@
 #pragma once
 #include <GL/freeglut_std.h>
-#include "data.h"
+#include "../data.h"
 
 namespace uimanager{
 	

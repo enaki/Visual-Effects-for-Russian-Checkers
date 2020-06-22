@@ -18,6 +18,11 @@
 
 #define M_PI glm::pi<float>()
 
+//uiManager
+int MOUSEX = 0;
+int MOUSEY = 0;
+int PRESSED = 0;
+int SIDE_COEF;
 
 //definirea variabilelor globale
 int WIN;

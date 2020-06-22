@@ -63,7 +63,7 @@ inline void init_from_file() {
 		exit(1);
 	}
 
-	fscanf_s(in, "%d %d %d %d %d %d %d %d %d %d", &uimanager::SIDE_COEF, &uimanager::MOUSEX, &uimanager::MOUSEY, &sel.first, &sel.second, &to.first, &to.second, &GO, &POS_MOVES, &HELP);
+	fscanf_s(in, "%d %d %d %d %d %d %d %d %d %d", &SIDE_COEF, &MOUSEX, &MOUSEY, &sel.first, &sel.second, &to.first, &to.second, &GO, &POS_MOVES, &HELP);
 
 	int check, type;
 	for (auto i = 0; i < ROWS; i++)
@@ -76,7 +76,6 @@ inline void init_from_file() {
 	fclose(in);
 }
 
-
 //functia de salvare in fisier
 inline void save_to_file() {
 	FILE* out;
@@ -86,7 +85,7 @@ inline void save_to_file() {
 		exit(1);
 	}
 
-	fprintf(out, "%d %d %d %d %d %d %d %d %d %d", uimanager::SIDE_COEF, uimanager::MOUSEX, uimanager::MOUSEY, sel.first, sel.second, to.first, to.second, GO, POS_MOVES, HELP);
+	fprintf(out, "%d %d %d %d %d %d %d %d %d %d", SIDE_COEF, MOUSEX, MOUSEY, sel.first, sel.second, to.first, to.second, GO, POS_MOVES, HELP);
 
 	for (auto i = 0; i < ROWS; i++)
 		for (auto j = 0; j < COLUMNS; j++)

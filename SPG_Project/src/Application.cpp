@@ -1,23 +1,22 @@
 #include <GL/glew.h>
 #include <cstdlib>
-#include "Application.h"
-
-#include <iostream>
-
-#include "Utils/utilities.h"
-#include "grafix.hpp"
 #include <queue>
 #include <list>
-#include "data.h"
-#include "Game.h"
+#include <iostream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "Utils/stb_image.h"
+
+#include "Graphics/grafix.hpp"
+
+#include "Game/Game.h"
 #include "UIManager/keyboard.h"
 
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "Utils/stb_image.h"
 
+#include "Application.h"
 
 
 //functia main in care initializam rutina OpenGL si Glut
@@ -109,8 +108,8 @@ void timer(int s) {
 
 	for (auto i = 0; i < ROWS; i++)
 		for (auto j = 0; j < COLUMNS; j++)
-			if (uimanager::MOUSEX < board[i][j].x + 30 && uimanager::MOUSEX > board[i][j].x - 30 && uimanager::MOUSEY < board[i][j].y + 30 && uimanager::MOUSEY > board[i][j].y - 30)
-				if (uimanager::PRESSED) {
+			if (MOUSEX < board[i][j].x + 30 && MOUSEX > board[i][j].x - 30 && MOUSEY < board[i][j].y + 30 && MOUSEY > board[i][j].y - 30)
+				if (PRESSED) {
 					to.first = i;
 					to.second = j;
 				}
@@ -140,7 +139,7 @@ void put_checker() {
 
 	if (JUMPED && list_contain_element(jump_list, to.first, to.second)) {
 		JUMPED = false;
-		uimanager::PRESSED = 0;
+		PRESSED = 0;
 
 		sel.first = to.first;
 		sel.second = to.second;
@@ -151,25 +150,25 @@ void put_checker() {
 
 		GO = (GO == WHITE_CHECKER) ? BLACK_CHECKER : WHITE_CHECKER;
 		JUMPED = false;
-		uimanager::PRESSED = 0;
+		PRESSED = 0;
 
 		display();
 
 		if (ROTIRI) {
 			sleep(1);
 			glRotatef(180, 0, 0, 1);
-			uimanager::SIDE_COEF *= -1;
+			SIDE_COEF *= -1;
 		}
 		sel.first = sel.second = -1;
 		to.first = to.second = -1;
-		uimanager::MOUSEX = uimanager::MOUSEY = -240;
+		MOUSEX = MOUSEY = -240;
 	}
 }
 
 //fixeaza coordonatele cursorului, chiar daca nu se apasa nici un buton
 void passive_motion(int x, int y) {
-	x = (x - 275) * uimanager::SIDE_COEF;
-	y = (y - 275) * (-1) * uimanager::SIDE_COEF;
+	x = (x - 275) * SIDE_COEF;
+	y = (y - 275) * (-1) * SIDE_COEF;
 
 	for (auto i = 0; i < ROWS; i++)
 		for (auto j = 0; j < COLUMNS; j++) {
@@ -185,8 +184,8 @@ void passive_motion(int x, int y) {
 //initializarea tablei de dame -=Joc Nou=-
 void board_init() {
 	int s = -240;
-	uimanager::SIDE_COEF = 1;
-	uimanager::MOUSEX = uimanager::MOUSEY = -241;
+	SIDE_COEF = 1;
+	MOUSEX = MOUSEY = -241;
 	sel.first = sel.second = -1;
 	to.first = to.second = -1;
 
@@ -246,7 +245,7 @@ void undo() {
 	GO = (GO == WHITE_CHECKER) ? BLACK_CHECKER : WHITE_CHECKER;
 	if (ROTIRI) {
 		glRotatef(180, 0, 0, 1);
-		uimanager::SIDE_COEF *= -1;
+		SIDE_COEF *= -1;
 	}
 	glutPostRedisplay();
 }
@@ -285,7 +284,7 @@ void action_menu(int option) {
 		glutDestroyWindow(WIN);
 		exit(0);
 	case 1:
-		if (uimanager::SIDE_COEF == -1)
+		if (SIDE_COEF == -1)
 			glRotatef(180, 0, 0, 1);
 		TYPE1 = WHITE_CHECKER;
 		TYPE2 = BLACK_CHECKER;
@@ -296,12 +295,12 @@ void action_menu(int option) {
 		TYPE1 = WHITE_CHECKER;
 		TYPE2 = BLACK_CHECKER;
 		init_from_file();
-		if (uimanager::SIDE_COEF == -1)
+		if (SIDE_COEF == -1)
 			glRotatef(180, 0, 0, 1);
 		break;
 	case 3:
-		uimanager::SIDE_COEF *= -1;
-		uimanager::MOUSEX = uimanager::MOUSEY = -241;
+		SIDE_COEF *= -1;
+		MOUSEX = MOUSEY = -241;
 		sel.first = sel.second = -1;
 		glRotatef(180, 0, 0, 1);
 		break;
@@ -564,7 +563,6 @@ void init()
 	setTexture((char*)"textures/board_normal.jpg", texture_shader_programme, board_texture_normal);
 	
 	create_menu();
-	uimanager::WIN = WIN;
 	glClearColor(0.9f, 0.9f, 0.9f, 0.9f);
 	//glMatrixMode(GL_PROJECTION);
 	//glLoadIdentity();
@@ -624,14 +622,14 @@ void draw_crown(GLuint crown_vbo, int i, int j)
 	const auto my = board[i][j].y;
 
 	float crown[3 * 8] = {
-		mx,			my - 10 * uimanager::SIDE_COEF,	 0.0f,
-		mx + 10,	my - 10 * uimanager::SIDE_COEF,	 0.0f,
-		mx + 10,	my + 10 * uimanager::SIDE_COEF,	 0.0f,
-		mx + 5,		my - 5 * uimanager::SIDE_COEF,	 0.0f,
-		mx,			my + 10 * uimanager::SIDE_COEF,	 0.0f,
-		mx - 5,		my - 5 * uimanager::SIDE_COEF,	 0.0f,
-		mx - 10,	my + 10 * uimanager::SIDE_COEF,	 0.0f,
-		mx - 10,	my - 10 * uimanager::SIDE_COEF,	 0.0f
+		mx,			my - 10 * SIDE_COEF,	 0.0f,
+		mx + 10,	my - 10 * SIDE_COEF,	 0.0f,
+		mx + 10,	my + 10 * SIDE_COEF,	 0.0f,
+		mx + 5,		my - 5 * SIDE_COEF,	 0.0f,
+		mx,			my + 10 * SIDE_COEF,	 0.0f,
+		mx - 5,		my - 5 * SIDE_COEF,	 0.0f,
+		mx - 10,	my + 10 * SIDE_COEF,	 0.0f,
+		mx - 10,	my - 10 * SIDE_COEF,	 0.0f
 	};
 	for (auto& crown_angle : crown)
 	{
@@ -708,13 +706,13 @@ void display() {
 				continue;
 
 			//selectarea unei piese
-			if (board[i][j].check == GO && uimanager::MOUSEX < board[i][j].x + 30 && uimanager::MOUSEX > board[i][j].x - 30 && uimanager::MOUSEY < board[i][j].y + 30 && uimanager::MOUSEY > board[i][j].y - 30)
+			if (board[i][j].check == GO && MOUSEX < board[i][j].x + 30 && MOUSEX > board[i][j].x - 30 && MOUSEY < board[i][j].y + 30 && MOUSEY > board[i][j].y - 30)
 			{
 				if (!jump_list.empty())
 				{
 					if (list_contain_element(jump_list, i, j) && board[i][j].check == GO)
 					{
-						if (uimanager::PRESSED)
+						if (PRESSED)
 						{
 							sel.first = i;
 							sel.second = j;
@@ -730,7 +728,7 @@ void display() {
 				else if (!move_list.empty())
 					if (list_contain_element(move_list, i, j))
 					{
-						if (uimanager::PRESSED)
+						if (PRESSED)
 						{
 							sel.first = i;
 							sel.second = j;
@@ -763,7 +761,7 @@ void display() {
 	}
 
 	//desenam cifrele din stinga tablei, literele de jos si doua linii de contur
-	draw_around(uimanager::SIDE_COEF);
+	draw_around(SIDE_COEF);
 
 	//Desenam toate miscarile posibile daca exista
 	if (POS_MOVES) draw_possible_moves();
@@ -771,9 +769,9 @@ void display() {
 	//desenam output-ul meniului "Ajutor"
 	if (HELP)
 	{
-		show_help(uimanager::SIDE_COEF);
-		if (uimanager::PRESSED)
-			if (uimanager::MOUSEX * uimanager::SIDE_COEF > 190 && uimanager::MOUSEY * uimanager::SIDE_COEF > 140 && uimanager::MOUSEX * uimanager::SIDE_COEF < 210 && uimanager::MOUSEY * uimanager::SIDE_COEF < 160)
+		show_help(SIDE_COEF);
+		if (PRESSED)
+			if (MOUSEX * SIDE_COEF > 190 && MOUSEY * SIDE_COEF > 140 && MOUSEX * SIDE_COEF < 210 && MOUSEY * SIDE_COEF < 160)
 			{
 				HELP = false;
 			}
@@ -788,24 +786,24 @@ void display() {
 		list_of_moves(move_list);
 
 		if (TYPE1 == TYPE2)
-			show_intro(uimanager::SIDE_COEF);
+			show_intro(SIDE_COEF);
 		else
 		{
 			//afisam invingatorul sau detinatorul de miscare in timpul dat
 			if (count_checkers(WHITE_CHECKER) == 0 || no_more_moves(WHITE_CHECKER))
 			{
-				show_winner("Negrele au invins!", uimanager::SIDE_COEF);
-				show_turn("Negrele au invins!", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				show_winner("Negrele au invins!", SIDE_COEF);
+				show_turn("Negrele au invins!", SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			}
 			else if (count_checkers(BLACK_CHECKER) == 0 || no_more_moves(BLACK_CHECKER))
 			{
-				show_winner("Albele au invins!", uimanager::SIDE_COEF);
-				show_turn("Albele au invins!", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				show_winner("Albele au invins!", SIDE_COEF);
+				show_turn("Albele au invins!", SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			}
 			else if (GO == WHITE_CHECKER)
-				show_turn("White's turn", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				show_turn("White's turn", SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			else if (GO == BLACK_CHECKER)
-				show_turn("Black's turn", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				show_turn("Black's turn", SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 		}
 	}
 	glFlush();

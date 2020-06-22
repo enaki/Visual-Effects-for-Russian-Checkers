@@ -2,10 +2,7 @@
 #include <GL/freeglut_std.h>
 
 namespace uimanager {
-	int MOUSEX = 0;
-	int MOUSEY = 0;
-	int PRESSED = 0;
-	int SIDE_COEF;
+	
 
 
 	//fixeaza x si y daca butonul sting al mouse-ului este aparat

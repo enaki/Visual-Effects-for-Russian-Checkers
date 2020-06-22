@@ -130,7 +130,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
-    <ClCompile Include="src\grafix.cpp" />
+    <ClCompile Include="src\Graphics\grafix.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\bsq_fragment.shader" />
@@ -146,8 +146,8 @@
   <ItemGroup>
     <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\data.h" />
-    <ClInclude Include="src\Game.h" />
-    <ClInclude Include="src\grafix.hpp" />
+    <ClInclude Include="src\Game\Game.h" />
+    <ClInclude Include="src\Graphics\grafix.hpp" />
     <ClInclude Include="src\UIManager\keyboard.h" />
     <ClInclude Include="src\UIManager\mouse.h" />
     <ClInclude Include="src\Utils\stb_image.h" />

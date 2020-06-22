@@ -1,4 +1,5 @@
-#pragma once
+﻿#pragma once
+#include <glm/detail/type_vec3.hpp>
 
 //prototipurile functiilor
 void board_init();
@@ -15,4 +16,5 @@ void update_uniform_fragment_shader(GLuint& shader_programme);
 void compile_shader(GLuint& shader);
 void init_data();
 void draw_possible_moves();
+void draw_circle(const float cx, const float cy, const float radius, const int num_segments, const glm::vec3 color);
 

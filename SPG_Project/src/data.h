@@ -16,7 +16,7 @@
 #define CHECKER			0
 #define KING			1
 
-#define M_PI 3.1415926535897932384626433832795
+#define M_PI glm::pi<float>()
 
 
 //definirea variabilelor globale
@@ -46,14 +46,15 @@ square board[ROWS][COLUMNS], undo_board[ROWS][COLUMNS];
 std::pair<int, int> sel, to;
 
 glm::mat4 projectionMatrix, viewMatrix, modelMatrix;
-//glm::vec3 lightPos(0, 1, 5);
-//glm::vec3 viewPos(2, 3, 6);
-
-//glm::vec3 light_pos(0, 1, 5);
-//glm::vec3 view_pos(0, 0, 1);
 
 glm::vec3 light_pos(0, 1, 5);
 glm::vec3 view_pos(0, 0, 1);
+
+glm::vec3 type1_color(1, 1, 1);	//white
+glm::vec3 type1_selected_color(0.7, 0.7, 0.7);	//gray
+
+glm::vec3 type2_color(0.1, 0.1, 1);	//blue
+glm::vec3 type2_selected_color(0.2, 0.2, 0.8);	//blue pale
 
 GLint enable_lighting = 1;
 GLint enable_texture = 1;

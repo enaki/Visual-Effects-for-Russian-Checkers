@@ -17,7 +17,6 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "Utils/stb_image.h"
-#define PI glm::pi<float>()
 
 GLuint lighting_shader_programme, texture_shader_programme, vao;
 GLuint vbo = 1;
@@ -392,6 +391,22 @@ void draw_possible_moves() {
 	JUMPED = e;
 }
 
+void draw_circle(const float cx, const float cy, const float radius, const int num_segments, const glm::vec3 color)
+{
+	glBegin(GL_LINE_LOOP);
+	glColor3f(color.x, color.y, color.z);
+
+	for (auto ii = 0; ii < num_segments; ii++)
+	{
+		float theta = 2.0f * 3.1415926f * float(ii) / float(num_segments);//get the current angle
+
+		float x = radius * cosf(theta);
+		float y = radius * sinf(theta);
+
+		glVertex2f(x + cx, y + cy);//output vertex
+	}
+	glEnd();
+}
 
 void update_uniform_fragment_shader(GLuint &shader_programme)
 {
@@ -458,7 +473,7 @@ void init()
 	
 	create_menu();
 	uimanager::WIN = WIN;
-	glClearColor(0.9, 0.9, 0.9, 0.9);
+	glClearColor(0.9f, 0.9f, 0.9f, 0.9f);
 	//glMatrixMode(GL_PROJECTION);
 	//glLoadIdentity();
 	glOrtho(-275.0, 275.0, -275.0, 275.0, 0.0, 1.0);
@@ -471,8 +486,6 @@ void display() {
 	//curatam ecranul
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(0);
-	int s;
-	float x, y;
 
 	GLuint vbo = 1;
 	glGenBuffers(1, &vbo);
@@ -563,7 +576,7 @@ void display() {
 	}
 
 	
-	
+	//draw checkers pieces
 	for (auto i = 0; i < ROWS; i++) {
 		for (auto j = 0; j < COLUMNS; j++) {
 			
@@ -576,9 +589,9 @@ void display() {
 			
 			//color the checkers according to type
 			if (board[i][j].check == WHITE_CHECKER)
-				color = glm::vec3(1, 1, 1); //Albe
+				color = type1_color; 
 			else if (board[i][j].check == BLACK_CHECKER)
-				color = glm::vec3(0.2, 0.2, 0.8); //Albastre
+				color = type2_color;
 			else
 				continue;
 			
@@ -591,10 +604,10 @@ void display() {
 							sel.second = j;
 						}
 						//culoarea pieselor selectate in dependenta de tip
-						if (board[i][j].check == BLACK_CHECKER)
-							color = glm::vec3(0.2, 0.2, 0.6); //violeta
 						if (board[i][j].check == WHITE_CHECKER)
-							color = glm::vec3(0.7, 0.7, 0.7);	//surie
+							color = type1_selected_color;
+						else if (board[i][j].check == BLACK_CHECKER)
+							color = type2_selected_color;
 					}
 				}
 
@@ -606,10 +619,11 @@ void display() {
 						}
 
 						//culoarea pieselor selectate in dependenta de tip
-						if (board[i][j].check == BLACK_CHECKER)
-							color = glm::vec3(0.2, 0.2, 0.6);//violeta
 						if (board[i][j].check == WHITE_CHECKER)
-							color = glm::vec3(0.7, 0.7, 0.7);//surie
+							color = type1_selected_color;
+						else if (board[i][j].check == BLACK_CHECKER)
+							color = type2_selected_color;
+						
 					}
 				}
 			}
@@ -690,7 +704,7 @@ void display() {
 
 	//desenam cifrele din stinga tablei, literele de jos
 	//si doua linii de contur
-	drawAround(uimanager::SIDE_COEF);
+	draw_around(uimanager::SIDE_COEF);
 
 	//Desenam toate miscarile posibile daca exista
 	if (POS_MOVES)
@@ -698,7 +712,7 @@ void display() {
 
 	//desenam output-ul meniului "Ajutor"
 	if (HELP) {
-		showHelp(uimanager::SIDE_COEF);
+		show_help(uimanager::SIDE_COEF);
 		if (uimanager::PRESSED) {
 			if (uimanager::MOUSEX * uimanager::SIDE_COEF > 190 && uimanager::MOUSEY * uimanager::SIDE_COEF > 140 && uimanager::MOUSEX * uimanager::SIDE_COEF < 210 && uimanager::MOUSEY * uimanager::SIDE_COEF < 160) {
 				HELP = false;
@@ -714,21 +728,21 @@ void display() {
 		list_of_moves(move_list);
 
 		if (TYPE1 == TYPE2)
-			showIntro(uimanager::SIDE_COEF);
+			show_intro(uimanager::SIDE_COEF);
 		else {
 			//afisam invingatorul sau detinatorul de miscare in timpul dat
 			if (count_checkers(WHITE_CHECKER) == 0 || no_more_moves(WHITE_CHECKER)) {
-				showWiner("Negrele au invins!", uimanager::SIDE_COEF);
-				showTurn("Negrele au invins!", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				show_winner("Negrele au invins!", uimanager::SIDE_COEF);
+				show_turn("Negrele au invins!", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			}
 			else if (count_checkers(BLACK_CHECKER) == 0 || no_more_moves(BLACK_CHECKER)) {
-				showWiner("Albele au invins!", uimanager::SIDE_COEF);
-				showTurn("Albele au invins!", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				show_winner("Albele au invins!", uimanager::SIDE_COEF);
+				show_turn("Albele au invins!", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			}
 			else if (GO == WHITE_CHECKER)
-				showTurn("White's turn", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				show_turn("White's turn", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 			else if (GO == BLACK_CHECKER)
-				showTurn("Black's turn", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
+				show_turn("Black's turn", uimanager::SIDE_COEF, count_checkers(WHITE_CHECKER), count_checkers(BLACK_CHECKER));
 		}
 	}
 	glFlush();

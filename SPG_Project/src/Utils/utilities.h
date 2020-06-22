@@ -39,8 +39,9 @@ int are_identic(struct square a[ROWS][COLUMNS], struct square b[ROWS][COLUMNS]) 
 }
 
 //permite atirnarea programului pentru "Sec" secunde
-void sleep(unsigned int sec) {
-	clock_t ticks1 = clock(), ticks2 = ticks1;
+void sleep(long sec) {
+	const auto ticks1 = clock();
+	auto ticks2 = ticks1;
 	while ((ticks2 / CLOCKS_PER_SEC - ticks1 / CLOCKS_PER_SEC) < sec)
 		ticks2 = clock();
 }
@@ -52,6 +53,7 @@ std::pair<int, int> coords_to_index(int x, int y) {
 		for (location.second = 0; location.second < COLUMNS; location.second++)
 			if (x < board[location.first][location.second].x + 30 && x > board[location.first][location.second].x - 30 && y < board[location.first][location.second].y + 30 && y > board[location.first][location.second].y - 30)
 				return location;
+	throw std::exception("Invalid parameter in coords_to_index functions.");
 }
 
 //initializarea tablei de dame din fisierul "joc.check"

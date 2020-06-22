@@ -2,9 +2,9 @@
 
 
 //prototipurile functiilor de text grafic
-void showIntro(int c);
-void showWiner(const char*, int);
-void showHelp(int);
-void drawAround(int);
-void showTurn(const char*, int, int, int);
+void show_intro(int c);
+void show_winner(const char*, int);
+void show_help(int);
+void draw_around(int);
+void show_turn(const char*, int, int, int);
 

@@ -413,9 +413,6 @@ void draw_circle(float cx, float cy, float radius, const int num_segments, const
 
 	float* circle_buffer = new float[3 * num_segments];
 	
-	//glBegin(GL_LINE_LOOP);
-	//glColor3f(color.x, color.y, color.z);
-
 	for (auto ii = 0; ii < num_segments; ii++)
 	{
 		auto theta = 2.0f * 3.1415926f * float(ii) / float(num_segments);//get the current angle
@@ -426,10 +423,7 @@ void draw_circle(float cx, float cy, float radius, const int num_segments, const
 		circle_buffer[3 * ii] = x + cx;
 		circle_buffer[3 * ii + 1] = y + cy;
 		circle_buffer[3 * ii + 2] = 0;
-		
-		//glVertex2f(x + cx, y + cy);//output vertex
 	}
-	//glEnd();
 	
 	glBindBuffer(GL_ARRAY_BUFFER, circle_vbo);
 	glBufferData(GL_ARRAY_BUFFER, 3 * num_segments * sizeof(float), circle_buffer, GL_STATIC_DRAW);
@@ -440,6 +434,46 @@ void draw_circle(float cx, float cy, float radius, const int num_segments, const
 	glUseProgram(0);
 	delete[] circle_buffer;
 }
+
+void draw_checkers_piece(float board_x, float board_y, const int num_segments, const glm::vec3 color, GLuint& checkers_vbo, bool scalation = false)
+{
+	glUseProgram(lighting_shader_programme);
+	glEnableVertexAttribArray(0);
+
+	GLuint color_id = glGetUniformLocation(lighting_shader_programme, "color");
+	glUniform3fv(color_id, 1, glm::value_ptr(color));
+
+	GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
+	glUniform1i(lightingEn_id, enable_lighting);
+
+	update_uniform_fragment_shader(lighting_shader_programme);
+
+	float *checker_positions = new float[3 * num_segments];
+	for (auto k = 0; k < num_segments; k++) {
+		auto x = 2 * M_PI * k / static_cast<float>(num_segments);
+		checker_positions[3 * k] = 25 * cos(x) + (board_x - 30 + board_x + 30) / 2;
+		checker_positions[3 * k + 1] = 25 * sin(x) + (board_y - 30 + board_y + 30) / 2;
+		checker_positions[3 * k + 2] = 0;
+	}
+
+	if (scalation)
+	{
+		for (auto checker = 0; checker < 3 * num_segments; checker++)
+		{
+			checker_positions[checker] /= 275;
+		}
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, checkers_vbo);
+	glBufferData(GL_ARRAY_BUFFER, 3 * num_segments * sizeof(float), checker_positions, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	glDrawArrays(GL_POLYGON, 0, num_segments);
+	glDisableVertexAttribArray(0);
+	glUseProgram(0);
+	delete[] checker_positions;
+}
+
 
 
 void update_uniform_fragment_shader(GLuint &shader_programme)
@@ -666,40 +700,10 @@ void display() {
 			//desenam piesele de joc (octagoane)
 			//conform formulelor parametrice a cercului
 			const auto circle_precision = 16;
-			float checker_positions[3 * circle_precision];
-			for (auto k = 0; k < circle_precision; k++) {
-				auto x = 2 * M_PI * k / static_cast<float>(circle_precision);
-				checker_positions[3 * k] = 25 * cos(x) + (board[i][j].x - 30 + board[i][j].x + 30) / 2;
-				checker_positions[3 * k + 1] = 25 * sin(x) + (board[i][j].y - 30 + board[i][j].y + 30) / 2;
-				checker_positions[3 * k + 2] = 0;
-			}
 
-			for (auto& checker_position : checker_positions)
-			{
-				checker_position /= 275;
-			}
-			
-			glUseProgram(lighting_shader_programme);
-			glEnableVertexAttribArray(0);
-			
-			glUniform3fv(color_id, 1, glm::value_ptr(color));
-			glBindBuffer(GL_ARRAY_BUFFER, checkers_vbo);
-			glBufferData(GL_ARRAY_BUFFER, 3 * circle_precision * sizeof(float), checker_positions, GL_STATIC_DRAW);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-			GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
-			glUniform1i(lightingEn_id, enable_lighting);
-
-			update_uniform_fragment_shader(lighting_shader_programme);
-			
-			glDrawArrays(GL_POLYGON, 0, circle_precision);
-
-			glDisableVertexAttribArray(0);
-			glUseProgram(0);
-			
+			draw_checkers_piece(board[i][j].x, board[i][j].y, 16, color, checkers_vbo, true);
 			draw_circle(board[i][j].x, board[i][j].y, 30 - 10, 50, get_alternate_color(color), color_vbo, true);
 
-			
 			//desenam coronita la dame
 			if (board[i][j].type == KING) {
 				const auto mx = board[i][j].x;

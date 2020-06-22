@@ -110,6 +110,11 @@ inline std::string textFileRead(char* fn)
 
 inline glm::vec3 get_alternate_color(const glm::vec3 color)
 {
+	return glm::vec3(1.0f - color.x, 1.0f - color.y, 1.0f - color.z);
+}
+
+inline glm::vec3 get_alternate_color_2(const glm::vec3 color)
+{
 	if (color == type1_color) return type2_color;
 	if (color == type2_color) return type1_color;
 	if (color == type1_selected_color) return type2_selected_color;

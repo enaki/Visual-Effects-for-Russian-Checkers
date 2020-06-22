@@ -259,20 +259,20 @@ void create_menu() {
 	glutAddMenuEntry("Normal On/Off", 11);
 	glutAddMenuEntry("Change Light Type", 12);
 	glutAddMenuEntry("Undo", 6);
-	glutAddMenuEntry("Rotire 180", 3);
-	glutAddMenuEntry("Rotiri on/off", 4);
-	glutAddMenuEntry("Miscari Posibile on/off", 7);
+	glutAddMenuEntry("Rotation 180", 3);
+	glutAddMenuEntry("Rotations on/off", 4);
+	glutAddMenuEntry("Possible Moves on/off", 7);
 	
 
 	int menuId = glutCreateMenu(action_menu);
 
-	glutAddMenuEntry("Joc Nou", 1);
-	glutAddMenuEntry("Continuare Joc", 2);
-	glutAddMenuEntry("Salvare Joc", 5);
-	glutAddSubMenu("Optiuni", options);
-	glutAddMenuEntry("Ajutor", 8);
+	glutAddMenuEntry("New Game", 1);
+	glutAddMenuEntry("Continue", 2);
+	glutAddMenuEntry("Save", 5);
+	glutAddSubMenu("Settings", options);
+	glutAddMenuEntry("Help", 8);
 
-	glutAddMenuEntry("Iesire", 0);
+	glutAddMenuEntry("Exit", 0);
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
@@ -395,7 +395,7 @@ void draw_possible_moves() {
 	JUMPED = e;
 }
 
-void draw_circle(float cx, float cy, float radius, const int num_segments, const glm::vec3 color, GLuint& circle_vbo, bool scalation=false)
+void draw_circle(float cx, float cy, float radius, const int num_segments, const glm::vec3 color, GLuint& circle_vbo, int c, bool scalation=false)
 {
 	glUseProgram(lighting_shader_programme);
 	glEnableVertexAttribArray(0);
@@ -427,8 +427,8 @@ void draw_circle(float cx, float cy, float radius, const int num_segments, const
 		auto x = radius * cosf(theta);
 		auto y = radius * sinf(theta);
 
-		circle_buffer[3 * ii] = x + cx;
-		circle_buffer[3 * ii + 1] = y + cy;
+		circle_buffer[3 * ii] = c* (x + cx);
+		circle_buffer[3 * ii + 1] = c* (y + cy);
 		circle_buffer[3 * ii + 2] = 0;
 	}
 	
@@ -442,7 +442,7 @@ void draw_circle(float cx, float cy, float radius, const int num_segments, const
 	delete[] circle_buffer;
 }
 
-void draw_checkers_piece(float board_x, float board_y, const int num_segments, const glm::vec3 color, GLuint& checkers_vbo, bool scalation = false)
+void draw_checkers_piece(float board_x, float board_y, const int num_segments, const glm::vec3 color, GLuint& checkers_vbo, int c, bool scalation = false)
 {
 	glUseProgram(lighting_shader_programme);
 	glEnableVertexAttribArray(0);
@@ -465,6 +465,13 @@ void draw_checkers_piece(float board_x, float board_y, const int num_segments, c
 		checker_positions[3 * k + 1] = 25 * sin(x) + (board_y - 30 + board_y + 30) / 2;
 		checker_positions[3 * k + 2] = 0;
 	}
+	if (c < 0)
+	{
+		for (auto k = 0; k < 3* num_segments; k++) {
+			checker_positions[k] *= c;
+		}
+	}
+	
 
 	if (scalation)
 	{
@@ -623,7 +630,7 @@ void draw_board_with_texture(GLuint &board_texture_vbo)
 	glUseProgram(0);
 }
 
-void draw_crown(GLuint crown_vbo, int i, int j)
+void draw_crown(GLuint crown_vbo, int i, int j, int c)
 {
 	glm::vec3 color;
 	
@@ -633,20 +640,26 @@ void draw_crown(GLuint crown_vbo, int i, int j)
 	const auto my = board[i][j].y;
 
 	float crown[3 * 8] = {
-		mx,			my - 10 * SIDE_COEF,	 0.0f,
-		mx + 10,	my - 10 * SIDE_COEF,	 0.0f,
-		mx + 10,	my + 10 * SIDE_COEF,	 0.0f,
-		mx + 5,		my - 5 * SIDE_COEF,	 0.0f,
-		mx,			my + 10 * SIDE_COEF,	 0.0f,
-		mx - 5,		my - 5 * SIDE_COEF,	 0.0f,
-		mx - 10,	my + 10 * SIDE_COEF,	 0.0f,
-		mx - 10,	my - 10 * SIDE_COEF,	 0.0f
+		mx,			my - 10,	 0.0f,
+		mx + 10,	my - 10,	 0.0f,
+		mx + 10,	my + 10,	 0.0f,
+		mx + 5,		my - 5,		0.0f,
+		mx,			my + 10,	 0.0f,
+		mx - 5,		my - 5,		0.0f,
+		mx - 10,	my + 10,	 0.0f,
+		mx - 10,	my - 10,	 0.0f
 	};
 	for (auto& crown_angle : crown)
 	{
 		crown_angle /= 275;
 	}
-
+	if (c < 0)
+	{
+		for (auto& crown_angle : crown)
+		{
+			crown_angle *= c;
+		}
+	}
 	if (board[i][j].check == WHITE_CHECKER)
 		color = glm::vec3(0.0, 0.0, 1.0);
 	else if (board[i][j].check == BLACK_CHECKER)
@@ -757,22 +770,23 @@ void display() {
 			//conform formulelor parametrice a cercului
 			const auto circle_precision = 16;
 
-			draw_checkers_piece(board[i][j].x, board[i][j].y, 16, color, checkers_vbo, true);
-			draw_circle(board[i][j].x, board[i][j].y, 30 - 10, 30, get_alternate_color(color), color_vbo, true);
+			draw_checkers_piece(board[i][j].x, board[i][j].y, 16, color, checkers_vbo, SIDE_COEF, true);
+			draw_circle(board[i][j].x, board[i][j].y, 30 - 10, 30, get_alternate_color(color), color_vbo, SIDE_COEF, true);
 			if (board[i][j].type != KING)
 			{
-				draw_circle(board[i][j].x, board[i][j].y, 30 - 17, 30, get_alternate_color(color), color_vbo, true);
-				draw_circle(board[i][j].x, board[i][j].y, 30 - 24, 30, get_alternate_color(color), color_vbo, true);
+				draw_circle(board[i][j].x, board[i][j].y, 30 - 17, 30, get_alternate_color(color), color_vbo, SIDE_COEF, true);
+				draw_circle(board[i][j].x, board[i][j].y, 30 - 24, 30, get_alternate_color(color), color_vbo, SIDE_COEF, true);
 			} else
 			{
-				draw_crown(crown_vbo, i, j);
+				draw_crown(crown_vbo, i, j, SIDE_COEF);
 			}
 		}
 	}
 
 	//desenam cifrele din stinga tablei, literele de jos si doua linii de contur
 	draw_around(SIDE_COEF);
-
+	draw_light_position(light_pos.x, light_pos.y, SIDE_COEF);
+	
 	//Desenam toate miscarile posibile daca exista
 	if (POS_MOVES) draw_possible_moves();
 
@@ -818,3 +832,4 @@ void display() {
 	}
 	glFlush();
 }
+

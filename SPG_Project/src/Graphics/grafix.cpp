@@ -170,7 +170,7 @@ void draw_background()
 
 	//water-ul
 	glBegin(GL_QUADS);
-	glColor3f(0.7, 0.7, 0.7);
+	glColor3f(0.5, 0.5, 0.5);
 	glVertex2f(-240.0f, -240.0f);
 	glVertex2f(-240.0f, 240.0f);
 	glVertex2f(240.0f, 240.0f);
@@ -178,10 +178,8 @@ void draw_background()
 	glEnd();
 }
 
-
 //afiseaza cine detine miscarea si numarul de piese
 void show_turn(const char* s, int c, int white, int black) {
-	//selectam culoarea alba
 	glColor3f(menu_text_color1.x, menu_text_color1.y, menu_text_color1.z);
 	glRasterPos2f(-40.0f * c, 255.0f * c);
 	//afisam cine detine miscarea
@@ -209,4 +207,19 @@ void show_turn(const char* s, int c, int white, int black) {
 	if (black > 9)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, black / 10 + 48);
 	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, black % 10 + 48);
+}
+
+void draw_light_position(float x, float y, int c)
+{
+	//selectam culoarea alba
+	char buffer[40];
+	glColor3f(1, 1, 0);
+	sprintf_s(buffer, "Lx: %.2f\0", x);
+	glRasterPos2f(225.0f*c, -258.0f*c);
+	for (size_t i = 0; i < strlen(buffer); i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, buffer[i]);
+	sprintf_s(buffer, "Ly: %.2f\0", y);
+	glRasterPos2f(225.0f*c, -268.0f*c);
+	for (size_t i = 0; i < strlen(buffer); i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, buffer[i]);
 }

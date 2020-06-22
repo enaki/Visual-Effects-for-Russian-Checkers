@@ -391,22 +391,56 @@ void draw_possible_moves() {
 	JUMPED = e;
 }
 
-void draw_circle(const float cx, const float cy, const float radius, const int num_segments, const glm::vec3 color)
+void draw_circle(float cx, float cy, float radius, const int num_segments, const glm::vec3 color, GLuint& circle_vbo, bool scalation=false)
 {
-	glBegin(GL_LINE_LOOP);
-	glColor3f(color.x, color.y, color.z);
+	glUseProgram(lighting_shader_programme);
+	glEnableVertexAttribArray(0);
+	
+	GLuint color_id = glGetUniformLocation(lighting_shader_programme, "color");
+	glUniform3fv(color_id, 1, glm::value_ptr(color));
+
+	GLuint lightingEn_id = glGetUniformLocation(lighting_shader_programme, "enableLighting");
+	glUniform1i(lightingEn_id, enable_lighting);
+
+	update_uniform_fragment_shader(lighting_shader_programme);
+	
+	if (scalation)
+	{
+		cx /= 275;
+		cy /= 275;
+		radius /= 275;
+	}
+
+	float* circle_buffer = new float[3 * num_segments];
+	
+	//glBegin(GL_LINE_LOOP);
+	//glColor3f(color.x, color.y, color.z);
 
 	for (auto ii = 0; ii < num_segments; ii++)
 	{
-		float theta = 2.0f * 3.1415926f * float(ii) / float(num_segments);//get the current angle
+		auto theta = 2.0f * 3.1415926f * float(ii) / float(num_segments);//get the current angle
 
-		float x = radius * cosf(theta);
-		float y = radius * sinf(theta);
+		auto x = radius * cosf(theta);
+		auto y = radius * sinf(theta);
 
-		glVertex2f(x + cx, y + cy);//output vertex
+		circle_buffer[3 * ii] = x + cx;
+		circle_buffer[3 * ii + 1] = y + cy;
+		circle_buffer[3 * ii + 2] = 0;
+		
+		//glVertex2f(x + cx, y + cy);//output vertex
 	}
-	glEnd();
+	//glEnd();
+	
+	glBindBuffer(GL_ARRAY_BUFFER, circle_vbo);
+	glBufferData(GL_ARRAY_BUFFER, 3 * num_segments * sizeof(float), circle_buffer, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	glDrawArrays(GL_LINE_LOOP, 0, num_segments);
+	glDisableVertexAttribArray(0);
+	glUseProgram(0);
+	delete[] circle_buffer;
 }
+
 
 void update_uniform_fragment_shader(GLuint &shader_programme)
 {
@@ -460,10 +494,9 @@ void init()
 	const GLubyte* version = glGetString(GL_VERSION); // version as a string
 	printf("Renderer: %s\n", renderer);
 	printf("OpenGL version supported %s\n", version);
-	//glDepthFunc(GL_ALWAYS);
-	//glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_ALWAYS);
+	glEnable(GL_DEPTH_TEST);
 	glewInit();
-
 
 	create_shader_program((char*)"shader/light_vertex.shader", (char*)"shader/light_fragment.shader", lighting_shader_programme);
 	create_shader_program((char*)"shader/btext_vertex.shader", (char*)"shader/btext_fragment.shader", texture_shader_programme);
@@ -497,6 +530,8 @@ void display() {
 	glGenBuffers(1, &crown_vbo);
 	GLuint board_texture_vbo = 4;
 	glGenBuffers(1, &board_texture_vbo);
+	GLuint circle_vbo = 5;
+	glGenBuffers(1, &circle_vbo);
 	
 	vao = 0;
 	glGenVertexArrays(1, &vao);
@@ -658,9 +693,12 @@ void display() {
 			update_uniform_fragment_shader(lighting_shader_programme);
 			
 			glDrawArrays(GL_POLYGON, 0, circle_precision);
-			
+
 			glDisableVertexAttribArray(0);
 			glUseProgram(0);
+			
+			draw_circle(board[i][j].x, board[i][j].y, 30 - 10, 50, get_alternate_color(color), color_vbo, true);
+
 			
 			//desenam coronita la dame
 			if (board[i][j].type == KING) {

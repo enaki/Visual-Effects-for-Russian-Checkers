@@ -21,25 +21,23 @@ bool list_contain_element(std::list<std::pair<T, T>>& list, T pair_item_1, T pai
 }
 
 //copie informatia tablei pentru a putea face undo()
-void copy_array(struct square from[ROWS][COLUMNS], struct square to[ROWS][COLUMNS]) {
-	int i, j;
-	for (i = 0; i < ROWS; i++)
-		for (j = 0; j < COLUMNS; j++)
+inline void copy_array(struct square from[ROWS][COLUMNS], struct square to[ROWS][COLUMNS]) {
+	for (auto i = 0; i < ROWS; i++)
+		for (auto j = 0; j < COLUMNS; j++)
 			to[i][j] = from[i][j];
 }
 
 //returneaza 1 daca informatia de pe doua table este la fel, pentru undo()
-int are_identic(struct square a[ROWS][COLUMNS], struct square b[ROWS][COLUMNS]) {
-	int i, j;
-	for (i = 0; i < ROWS; i++)
-		for (j = 0; j < COLUMNS; j++)
+inline int are_identic(struct square a[ROWS][COLUMNS], struct square b[ROWS][COLUMNS]) {
+	for (auto i = 0; i < ROWS; i++)
+		for (auto j = 0; j < COLUMNS; j++)
 			if (a[i][j].check != b[i][j].check || a[i][j].type != b[i][j].type)
 				return 0;
 	return 1;
 }
 
 //permite atirnarea programului pentru "Sec" secunde
-void sleep(long sec) {
+inline void sleep(long sec) {
 	const auto ticks1 = clock();
 	auto ticks2 = ticks1;
 	while ((ticks2 / CLOCKS_PER_SEC - ticks1 / CLOCKS_PER_SEC) < sec)
@@ -57,7 +55,7 @@ std::pair<int, int> coords_to_index(int x, int y) {
 }
 
 //initializarea tablei de dame din fisierul "joc.check"
-void init_from_file() {
+inline void init_from_file() {
 	FILE* in;
 	fopen_s(&in, "joc.check", "r");
 	if (!in) {
@@ -80,7 +78,7 @@ void init_from_file() {
 
 
 //functia de salvare in fisier
-void save_to_file() {
+inline void save_to_file() {
 	FILE* out;
 	fopen_s(&out, "joc.check", "w");
 	if (!out) {
@@ -97,7 +95,7 @@ void save_to_file() {
 	fclose(out);
 }
 
-std::string textFileRead(char* fn)
+inline std::string textFileRead(char* fn)
 {
 	std::ifstream ifile(fn);
 	std::string filetext;
@@ -108,4 +106,13 @@ std::string textFileRead(char* fn)
 	}
 	if (filetext.empty()) throw new std::exception("Empty File.");
 	return filetext;
+}
+
+inline glm::vec3 get_alternate_color(const glm::vec3 color)
+{
+	if (color == type1_color) return type2_color;
+	if (color == type2_color) return type1_color;
+	if (color == type1_selected_color) return type2_selected_color;
+	if (color == type2_selected_color) return type1_selected_color;
+	throw std::exception("There is not alternate color for input color.");
 }

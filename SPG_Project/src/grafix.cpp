@@ -155,8 +155,8 @@ void show_turn(const char* s, int c, int white, int black) {
 	std::string str2 = "Black: ";
 	//afisam cite piese Albe sunt
 	glRasterPos2f(-240.0f * c, 255.0f * c);
-	for (size_t i = 0; i < str1.size(); i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, str1[i]);
+	for (auto i : str1)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, i);
 
 	glRasterPos2f(-190.0f * c, 255.0f * c);
 	if (white > 9)
@@ -165,8 +165,8 @@ void show_turn(const char* s, int c, int white, int black) {
 
 	//afisam cite piese Negre sunt
 	glRasterPos2f(160.0f * c, 255.0f * c);
-	for (size_t i = 0; i < str2.size(); i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, str2[i]);
+	for (auto i : str2)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, i);
 
 	glRasterPos2f(225.0f * c, 255.0f * c);
 	if (black > 9)

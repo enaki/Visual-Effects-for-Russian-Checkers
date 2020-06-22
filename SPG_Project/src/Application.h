@@ -11,10 +11,10 @@ void passive_motion(int, int);
 void put_checker();
 void undo();
 void init();
-void create_shader_program(char* vertex_shader_file, char* fragment_shader_path, GLuint& shader_programme);
-void update_uniform_fragment_shader(GLuint& shader_programme);
+void create_shader_program(char*, char*, GLuint&);
+void update_uniform_fragment_shader(GLuint& );
 void compile_shader(GLuint& shader);
 void init_data();
 void draw_possible_moves();
-void draw_circle(const float cx, const float cy, const float radius, const int num_segments, const glm::vec3 color);
+void draw_circle(float, float, float, const int, const glm::vec3, GLuint& , bool);
 

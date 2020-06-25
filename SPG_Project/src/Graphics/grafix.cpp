@@ -75,8 +75,8 @@ void show_help(int c) {
 	glColor4f(menu_color.x, menu_color.y, menu_color.z, 0.5f);
 	glVertex2f(-200.0f * c, 150.0f * c);
 	glVertex2f(200.0f * c, 150.0f * c);
-	glVertex2f(200.0f * c, -150.0f * c);
-	glVertex2f(-200.0f * c, -150.0f * c);
+	glVertex2f(200.0f * c, -190.0f * c);
+	glVertex2f(-200.0f * c, -190.0f * c);
 
 	//desenam un patrat mic cu x, pentru a iesi din meniu
 	glColor4f(menu_color_2.x, menu_color_2.y, menu_color_2.z, 0.5f);
@@ -96,7 +96,7 @@ void show_help(int c) {
 	std::string str2 = "Fore more info:";
 	std::string str3 = "https://en.wikipedia.org/wiki/Russian_draughts";
 	std::string str4 = "Controls";
-	std::string str[12] = {
+	std::string str[16] = {
 		"w: Light Up",
 		"s: Light Down",
 		"a: Light Left",
@@ -108,7 +108,11 @@ void show_help(int c) {
 		"l: Light On/Off",
 		"t: Texture On/Off",
 		"n: Normals On/Off",
-		"o: Change Light Type"
+		"o: Change Light Type",
+		"_: Mul SpecPower by 2",
+		"+: Div SpecPower by 2",
+		"-: Dec SpecPower",
+		"=: Inc SpecPower"
 	};
 
 	glColor3f(1, 0, 0);
@@ -133,13 +137,13 @@ void show_help(int c) {
 
 	//controls
 	glColor3f(1, 0, 1);
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 8; i++)
 	{
 		glRasterPos2f(-180.0f * c, (-20.0f - i * 20) * c);
 		for (auto letter : str[i])
 			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, letter);
 		glRasterPos2f(10.0f * c, (-20.0f - i * 20) * c);
-		for (auto letter : str[i+6])
+		for (auto letter : str[i+8])
 			glutBitmapCharacter(GLUT_BITMAP_9_BY_15, letter);
 	}
 }

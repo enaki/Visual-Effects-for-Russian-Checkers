@@ -663,7 +663,7 @@ void draw_crown(GLuint crown_vbo, int i, int j, int c)
 	GLuint color_id = glGetUniformLocation(lighting_shader_programme, "color");
 
 	GLuint specPower_Id = glGetUniformLocation(lighting_shader_programme, "specPowerInput");
-	glUniform1i(specPower_Id, spec_power);
+	glUniform1f(specPower_Id, spec_power);
 	
 	//desenam coronita la dame
 	const auto mx = board[i][j].x;
@@ -714,7 +714,7 @@ void draw_water()
 	GLuint color_id = glGetUniformLocation(lighting_shader_programme, "color");
 
 	GLuint specPower_Id = glGetUniformLocation(lighting_shader_programme, "specPowerInput");
-	glUniform1i(specPower_Id, spec_power);
+	glUniform1f(specPower_Id, spec_power);
 
 	glUseProgram(lighting_shader_programme);
 	glEnableVertexAttribArray(0);

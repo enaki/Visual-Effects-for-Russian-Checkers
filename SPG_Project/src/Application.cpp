@@ -416,6 +416,9 @@ void draw_circle(float cx, float cy, float radius, const int num_segments, const
 
 	GLuint lighting_type = glGetUniformLocation(lighting_shader_programme, "lightingType");
 	glUniform1i(lighting_type, light_type);
+
+	GLuint specPower_Id = glGetUniformLocation(lighting_shader_programme, "specPowerInput");
+	glUniform1f(specPower_Id, spec_power);
 	
 	update_uniform_fragment_shader(lighting_shader_programme);
 	
@@ -463,6 +466,9 @@ void draw_checkers_piece(float board_x, float board_y, const int num_segments, c
 
 	GLuint lighting_type = glGetUniformLocation(lighting_shader_programme, "lightingType");
 	glUniform1i(lighting_type, light_type);
+
+	GLuint specPower_Id = glGetUniformLocation(lighting_shader_programme, "specPowerInput");
+	glUniform1f(specPower_Id, spec_power);
 	
 	update_uniform_fragment_shader(lighting_shader_programme);
 
@@ -512,6 +518,9 @@ void draw_board_square(int i, int j, const glm::vec3 color, GLuint& vbo)
 
 	GLuint lighting_type = glGetUniformLocation(lighting_shader_programme, "lightingType");
 	glUniform1i(lighting_type, light_type);
+
+	GLuint specPower_Id = glGetUniformLocation(lighting_shader_programme, "specPowerInput");
+	glUniform1f(specPower_Id, spec_power);
 	
 	update_uniform_fragment_shader(lighting_shader_programme);
 
@@ -534,7 +543,7 @@ void update_uniform_fragment_shader(GLuint &shader_programme)
 
 	GLuint viewPosLoc = glGetUniformLocation(shader_programme, "viewPos");
 	glUniform3fv(viewPosLoc, 1, glm::value_ptr(view_pos));
-
+	
 	//modelMatrix *= glm::rotate(rotAngle, glm::vec3(0, 1, 0));
 	GLuint modelMatrixLoc = glGetUniformLocation(shader_programme, "mvpMatrix");
 	auto mvp = projection_matrix * view_matrix * model_matrix;
@@ -620,10 +629,10 @@ void draw_board_with_texture(GLuint &board_texture_vbo)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
-	GLuint texture1ID = glGetUniformLocation(texture_shader_programme, "textureColor");
-	glUniform1i(texture1ID, 0);
-	GLuint texture2ID = glGetUniformLocation(texture_shader_programme, "textureNormal");
-	glUniform1i(texture2ID, 1);
+	GLuint texture1_id = glGetUniformLocation(texture_shader_programme, "textureColor");
+	glUniform1i(texture1_id, 0);
+	GLuint texture2_id = glGetUniformLocation(texture_shader_programme, "textureNormal");
+	glUniform1i(texture2_id, 1);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, board_texture);
@@ -634,7 +643,9 @@ void draw_board_with_texture(GLuint &board_texture_vbo)
 	glUniform1i(enable_normal_1, enable_normal);
 	GLuint lighting_en_id = glGetUniformLocation(texture_shader_programme, "enableLighting");
 	glUniform1i(lighting_en_id, enable_lighting);
-		
+	GLuint spec_power_id = glGetUniformLocation(lighting_shader_programme, "specPowerInput");
+	glUniform1f(spec_power_id, spec_power);
+	
 	update_uniform_fragment_shader(texture_shader_programme);
 		
 	glDrawArrays(GL_QUADS, 0, 4);
@@ -650,10 +661,15 @@ void draw_crown(GLuint crown_vbo, int i, int j, int c)
 	glm::vec3 color;
 	
 	GLuint color_id = glGetUniformLocation(lighting_shader_programme, "color");
+
+	GLuint specPower_Id = glGetUniformLocation(lighting_shader_programme, "specPowerInput");
+	glUniform1i(specPower_Id, spec_power);
+	
 	//desenam coronita la dame
 	const auto mx = board[i][j].x;
 	const auto my = board[i][j].y;
-
+	
+	
 	float crown[3 * 8] = {
 		mx,			my - 10,	 0.0f,
 		mx + 10,	my - 10,	 0.0f,
@@ -693,12 +709,33 @@ void draw_crown(GLuint crown_vbo, int i, int j, int c)
 	glUseProgram(0);
 }
 
+void draw_water()
+{
+	GLuint color_id = glGetUniformLocation(lighting_shader_programme, "color");
+
+	GLuint specPower_Id = glGetUniformLocation(lighting_shader_programme, "specPowerInput");
+	glUniform1i(specPower_Id, spec_power);
+
+	glUseProgram(lighting_shader_programme);
+	glEnableVertexAttribArray(0);
+	
+	glUniform3fv(color_id, 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 0.5f)));
+	glBindBuffer(GL_ARRAY_BUFFER, crown_vbo);
+	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), board_normalized, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glDrawArrays(GL_QUADS, 0, 4);
+
+	glDisableVertexAttribArray(0);
+	glUseProgram(0);
+}
+
 //functia de desenare grafica principala
 void display() {
 	//curatam ecranul
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(0);
 	draw_background();
+	draw_water();
 	
 	glm::vec3 color;
 
@@ -787,6 +824,7 @@ void display() {
 	//desenam cifrele din stinga tablei, literele de jos si doua linii de contur
 	draw_around(SIDE_COEF);
 	draw_light_position(light_pos.x, light_pos.y, SIDE_COEF);
+	draw_light_spec_power(spec_power, SIDE_COEF);
 	
 	//Desenam toate miscarile posibile daca exista
 	if (POS_MOVES) draw_possible_moves();

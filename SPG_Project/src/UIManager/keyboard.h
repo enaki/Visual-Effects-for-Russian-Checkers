@@ -49,6 +49,22 @@ namespace uimanager{
 		case 'o':
 			light_type = !light_type;
 			break;
+		case '=':
+			spec_power += 1;
+			if (spec_power > 1024) spec_power = 1024;
+			break;
+		case '-':
+			spec_power -= 1;
+			if (spec_power < 1) spec_power = 1;
+			break;
+		case '+':
+			spec_power *= 2;
+			if (spec_power > 1024) spec_power = 1024;
+			break;
+		case '_':
+			spec_power /= 2;
+			if (spec_power < 1) spec_power = 1;
+			break;
 		}
 		glutPostRedisplay();
 	}

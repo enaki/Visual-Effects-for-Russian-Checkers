@@ -9,6 +9,7 @@ in vec3 ourColor;
 uniform vec3 lightPos;
 uniform vec3 viewPos;
 uniform bool enableLighting;
+uniform float specPowerInput;
 
 uniform sampler2D textureColor;
 uniform sampler2D textureNormal;
@@ -28,7 +29,7 @@ vec3 lighting(vec3 pos, vec3 normal, vec3 lightPos, vec3 viewPos, vec3 ambient, 
 	float diffCoef = max(0, dot(L, N));
 	float specCoef = pow(max(0, dot(R, V)), specPower);
 
-	vec3 ambientColor = ambient * lightColor;
+	vec3 ambientColor = ambient* lightColor;
 	vec3 diffuseColor = diffCoef * lightColor;
 	vec3 specularColor = specCoef * specular * lightColor;
 	vec3 col = (ambientColor + diffuseColor + specularColor);
@@ -42,7 +43,7 @@ void main()
 	//vec3 diffuse = vec3(1.0, 0, 0);
 	vec3 diffuse = ourColor;
 	vec3 specular = vec3(0.8);
-	float specPower = 32;
+	float specPower = max(1, specPowerInput);
 	vec3 color;
 	vec3 normal_to_use = normal;
 	if (enableNormal == 1) {

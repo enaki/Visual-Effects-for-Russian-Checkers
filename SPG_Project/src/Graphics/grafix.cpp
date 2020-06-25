@@ -247,11 +247,21 @@ void draw_light_position(float x, float y, int c)
 	char buffer[40];
 	glColor3f(1, 1, 0);
 	sprintf_s(buffer, "Lx: %.2f\0", x);
-	glRasterPos2f(225.0f*c, -258.0f*c);
+	glRasterPos2f(225.0f, -258.0f);
 	for (size_t i = 0; i < strlen(buffer); i++)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, buffer[i]);
 	sprintf_s(buffer, "Ly: %.2f\0", y);
-	glRasterPos2f(225.0f*c, -268.0f*c);
+	glRasterPos2f(225.0f, -268.0f);
+	for (size_t i = 0; i < strlen(buffer); i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, buffer[i]);
+}
+
+void draw_light_spec_power(float spec, int c)
+{
+	char buffer[40];
+	glColor3f(0, 1, 1);
+	sprintf_s(buffer, "Sp: %.0f\0", spec);
+	glRasterPos2f(-270.0f, -262.0f);
 	for (size_t i = 0; i < strlen(buffer); i++)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_10, buffer[i]);
 }

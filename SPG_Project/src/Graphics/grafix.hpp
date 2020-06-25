@@ -8,4 +8,5 @@ void show_help(int);
 void draw_around(int);
 void show_turn(const char*, int, int, int);
 void draw_background();
-void draw_light_position(float x, float y, int c);
+void draw_light_position(float, float, int);
+void draw_light_spec_power(float, int);

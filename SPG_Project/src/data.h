@@ -67,6 +67,7 @@ GLint enable_lighting = 0;
 GLint enable_texture = 0;
 GLint enable_normal = 0;
 GLint light_type = 1;
+GLfloat spec_power = 32;
 
 GLuint lighting_shader_programme, texture_shader_programme;
 GLuint board_texture, board_texture_normal;
@@ -79,3 +80,8 @@ float full_board[32] = {
 	 240.0f,	 240.0f,	0.0f,		1.0f, 0.0f, 0.0f,	0.0f, 1.0f,
 	-240.0f,	 240.0f,	0.0f,		0.0f, 1.0f, 1.0f,	0.0f, 0.0f
 };
+
+float board_normalized[] = { -240.0f / 275,	-240.0f / 275,
+							-240.0f / 275,	240.0f / 275,
+							 240.0f / 275,	240.0f / 275,
+							 240.0f / 275,	-240.0f / 275 };

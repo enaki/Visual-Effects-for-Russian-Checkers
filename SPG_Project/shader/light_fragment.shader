@@ -14,9 +14,6 @@ uniform float specPowerInput;
 vec3 lighting_1(vec3 pos, vec3 normal, vec3 lightPos, vec3 viewPos,
 				vec3 ambient, vec3 diffuse, vec3 specular, float specPower)
 {
-	//functia calculeaza si returneaza culoarea conform cu modelul de iluminare Phong descris in documentatie
-	// ...
-	
 	vec3 L = normalize(lightPos - pos);
 	vec3 N = normalize(normal);
 

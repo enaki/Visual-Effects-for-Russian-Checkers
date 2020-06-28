@@ -17,16 +17,13 @@
 
 #include "Application.h"
 
-GLuint vbo = 1;
-GLuint color_vbo = 2;
-GLuint checkers_vbo = 3;
-GLuint crown_vbo = 3;
-GLuint board_texture_vbo = 4;
-GLuint circle_vbo = 5;
+GLuint vbo;
+GLuint circle_vbo;
+GLuint checkers_vbo;
+GLuint crown_vbo;
+GLuint board_texture_vbo;
 
 
-
-//functia main in care initializam rutina OpenGL si Glut
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
@@ -126,7 +123,6 @@ void timer(int s) {
 		if (move_is_legal(1))
 			put_checker(); 
 	}
-
 
 	//rechemarea recursiva a functiei timer()
 	glutTimerFunc(10, timer, 0);
@@ -593,11 +589,10 @@ void init()
 	glewInit();
 
 	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &color_vbo);
+	glGenBuffers(1, &circle_vbo);
 	glGenBuffers(1, &checkers_vbo);
 	glGenBuffers(1, &crown_vbo);
 	glGenBuffers(1, &board_texture_vbo);
-	glGenBuffers(1, &circle_vbo);
 	
 	create_shader_program((char*)"shader/light_vertex.shader", (char*)"shader/light_fragment.shader", lighting_shader_programme);
 	create_shader_program((char*)"shader/btext_vertex.shader", (char*)"shader/btext_fragment.shader", texture_shader_programme);
@@ -607,8 +602,8 @@ void init()
 	
 	create_menu();
 	glClearColor(0.9f, 0.9f, 0.9f, 0.9f);
-	//glMatrixMode(GL_PROJECTION);
-	//glLoadIdentity();
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
 	glOrtho(-275.0, 275.0, -275.0, 275.0, 0.0, 1.0);
 	board_init();
 }
@@ -809,11 +804,11 @@ void display() {
 			const auto circle_precision = 16;
 
 			draw_checkers_piece(board[i][j].x, board[i][j].y, 16, color, checkers_vbo, SIDE_COEF, true);
-			draw_circle(board[i][j].x, board[i][j].y, 30 - 10, 30, get_alternate_color(color), color_vbo, SIDE_COEF, true);
+			draw_circle(board[i][j].x, board[i][j].y, 30 - 10, 30, get_alternate_color(color), circle_vbo, SIDE_COEF, true);
 			if (board[i][j].type != KING)
 			{
-				draw_circle(board[i][j].x, board[i][j].y, 30 - 17, 30, get_alternate_color(color), color_vbo, SIDE_COEF, true);
-				draw_circle(board[i][j].x, board[i][j].y, 30 - 24, 30, get_alternate_color(color), color_vbo, SIDE_COEF, true);
+				draw_circle(board[i][j].x, board[i][j].y, 30 - 17, 30, get_alternate_color(color), circle_vbo, SIDE_COEF, true);
+				draw_circle(board[i][j].x, board[i][j].y, 30 - 24, 30, get_alternate_color(color), circle_vbo, SIDE_COEF, true);
 			} else
 			{
 				draw_crown(crown_vbo, i, j, SIDE_COEF);

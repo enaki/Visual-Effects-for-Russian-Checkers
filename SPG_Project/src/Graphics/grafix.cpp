@@ -229,7 +229,7 @@ void show_turn(const char* s, int c, int white, int black) {
 	for (auto i : str1)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, i);
 
-	glRasterPos2f(-190.0f * c, 255.0f * c);
+	glRasterPos2f(-175.0f * c, 255.0f * c);
 	if (white > 9)
 		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, white / 10 + 48);
 	glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, white % 10 + 48);
